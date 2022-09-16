@@ -30,5 +30,4 @@ RUN apk update; \
     apk add "expat>=2.4.5"
 RUN python -m pip install --upgrade pip; \
     pip install -r requirements.txt; \
-    pip list --outdated --format=freeze | grep -v '^\-e' | cut -d = -f 1 | xargs -n1 pip install -U ; \
     python -m pip uninstall -y pip;

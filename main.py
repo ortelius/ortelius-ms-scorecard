@@ -35,7 +35,7 @@ def isBlank (myString):
     return not (myString and myString.strip())
 
 # Init Globals
-service_name = 'ortelius-ms-dep-pkg-r'
+service_name = 'ortelius-ms-scorecard'
 db_conn_retry = 3
 
 app = FastAPI(

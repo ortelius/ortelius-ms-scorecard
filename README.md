@@ -1,4 +1,4 @@
-# ortelius-ms-dep-pkg-r
+# ortelius-ms-scorecard
 Dependency Package Data Microservice - Read
 
 This is a flask web application which returns a list of objects known as Component Dependencies when the 
