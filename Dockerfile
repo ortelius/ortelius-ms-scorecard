@@ -29,4 +29,5 @@ RUN apk update; \
     apk upgrade --available; \
     apk add "expat>=2.4.5"
 RUN pip install -r requirements.txt; \
-python -m pip uninstall -y pip;
+    pip list -o | cut -f1 -d' ' | tr " " "\n" | awk '{if(NR>=3)print)' | cut -d' ' -f1 | xargs -n1 pip install -U; \
+    python -m pip uninstall -y pip;
