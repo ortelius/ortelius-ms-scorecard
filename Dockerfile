@@ -28,6 +28,7 @@ RUN apk update; \
     apk add --upgrade apk-tools; \
     apk upgrade --available; \
     apk add "expat>=2.4.5"
+
 RUN python -m pip install --upgrade pip; \
     pip install -r requirements.txt; \
     python -m pip uninstall -y pip;
