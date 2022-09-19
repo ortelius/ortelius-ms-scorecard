@@ -24,6 +24,8 @@ WORKDIR /app
 
 COPY main.py /app
 COPY requirements.txt /app
+COPY reports /app/reports
+
 RUN apk update; \
     apk add --upgrade apk-tools; \
     apk upgrade --available; \
