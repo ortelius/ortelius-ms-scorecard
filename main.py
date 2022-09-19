@@ -12,24 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
 import logging
 import os
 import socket
-from http import HTTPStatus
 from time import sleep
-from typing import List, Optional
+from typing import Optional
 
-import psycopg2
 import psycopg2.extras
-import requests
 import uvicorn
-from fastapi import FastAPI, HTTPException, Query, Request, Response, status
+from fastapi import FastAPI, HTTPException, Request, Response, status
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from sqlalchemy import create_engine
-from sqlalchemy.exc import InterfaceError, OperationalError, StatementError
+from sqlalchemy.exc import InterfaceError, OperationalError
 
-from fastapi.staticfiles import StaticFiles
 
 def isBlank (myString):
     return not (myString and myString.strip())
