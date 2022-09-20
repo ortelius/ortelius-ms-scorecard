@@ -16,7 +16,7 @@ import logging
 import os
 import socket
 from time import sleep
-from typing import Optional
+from typing import Optional, Union
 
 import psycopg2.extras
 import uvicorn
@@ -135,7 +135,7 @@ class Message(BaseModel):
              }
          }
          )
-async def getScoreCard(request: Request):
+async def getScoreCard(request: Request, domain: Union[str, None] = None):
 
     response_data = []
 
@@ -148,9 +148,11 @@ async def getScoreCard(request: Request):
                 with engine.connect() as connection:
                     conn = connection.connection
                     cursor = conn.cursor()
-        
-                    sql = ""
+
                     sql = "SELECT * from dm.dm_scorecard_ui"
+
+                    if (domain is not None):
+                        sql = sql + " where domain in (WITH RECURSIVE rec (id) as ( SELECT a.id from dm.dm_domain a where id=" + str(domain) + " UNION ALL SELECT b.id from rec, dm.dm_domain b where b.domainid = rec.id ) SELECT * FROM rec);"
 
                     cursor.execute(sql)
 

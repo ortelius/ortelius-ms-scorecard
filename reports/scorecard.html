@@ -24,6 +24,7 @@
     <script type="text/javascript">
     
     function getParameterByName( name ) {
+     console.log(name);
      var regexS = "[\\?&]"+name+"=([^&#]*)", 
      regex = new RegExp( regexS ),
      results = regex.exec( window.location.search );
@@ -43,9 +44,20 @@
       		
   $(document).ready(function () 
   {  
-    $.getJSON("/msapi/scorecard",
+    var url = "/msapi/scorecard";
+
+    var domain = getParameterByName("domain");
+
+    if (domain.length > 0)
+     url = "/msapi/scorecard?domain=" + domain;
+
+    $.getJSON(url,
         function(data) {
-          
+  
+        domain = data.domain;
+
+        $("#report_title").html("Compliance Scorecard for " + domain);
+        
         cols = data.columns;
 
         for (i=0; i<cols.length;i++)
@@ -118,7 +130,7 @@
     </script>
 </head>
 <body class='default'>
-     <div style="text-align:center;"><H2 class="reports" style="color:black;">Compliance Scorecard</H2><p></div>
+     <div style="text-align:center;"><H2 id="report_title" class="reports" style="color:black;">Compliance Scorecard</H2><p></div>
      <div id="dataTable"></div>
        <div style='margin-top: 75px;'>
         <div style='float: left;'>
