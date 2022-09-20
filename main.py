@@ -102,6 +102,7 @@ async def health(response: Response):
 # end health check
 
 class ScoreCard(BaseModel):
+    domain: str = ""
     columns: list = None
     data: list = None
 class Message(BaseModel):
@@ -138,6 +139,7 @@ class Message(BaseModel):
 async def getScoreCard(request: Request, domain: Union[str, None] = None):
 
     response_data = []
+    domname = ""
 
     try:
         #Retry logic for failed query
@@ -152,11 +154,19 @@ async def getScoreCard(request: Request, domain: Union[str, None] = None):
                     sql = "SELECT * from dm.dm_scorecard_ui"
 
                     if (domain is not None):
+                        cursor2 = conn.cursor()
+                        cursor2.execute('SELECT fulldomain(' + str(domain) + ')')
+                        if cursor2.rowcount > 0:
+                            row = cursor2.fetchone()
+                            domname = row[0]
+                        cursor2.close()
+                        
                         sql = sql + " where domain in (WITH RECURSIVE rec (id) as ( SELECT a.id from dm.dm_domain a where id=" + str(domain) + " UNION ALL SELECT b.id from rec, dm.dm_domain b where b.domainid = rec.id ) SELECT * FROM rec);"
 
                     cursor.execute(sql)
 
                     data = ScoreCard()
+                    data.domain = domname
 
                     data.columns = []
                     for col in cursor.description:
