@@ -2,6 +2,16 @@ apiVersion: v1
 entries:
   ms-scorecard:
   - apiVersion: v1
+    created: "2022-09-20T20:59:56.088832813Z"
+    description: Dependency Packages
+    digest: 04519cc444ae540cbe09dd13fbcfcf4ff536adb844fca31a66cca6168d5b9d65
+    icon: https://ortelius.github.io/ortelius-charts/logo.png
+    name: ms-scorecard
+    type: application
+    urls:
+    - https://github.com/ortelius/ortelius-ms-scorecard/releases/download/ms-scorecard-10.0.0-build.15/ms-scorecard-10.0.0-build.15.tgz
+    version: 10.0.0-build.15
+  - apiVersion: v1
     created: "2022-09-19T18:47:06.948073601Z"
     description: Dependency Packages
     digest: cbda176ad298691159d9f8a20a9a72be13894102361c3478bdbaabc9d3491e08
@@ -51,4 +61,4 @@ entries:
     urls:
     - https://github.com/ortelius/ortelius-ms-scorecard/releases/download/ms-scorecard-10.0.0-build.10/ms-scorecard-10.0.0-build.10.tgz
     version: 10.0.0-build.10
-generated: "2022-09-19T18:47:06.948129703Z"
+generated: "2022-09-20T20:59:56.088872915Z"
