@@ -1,3 +1,3 @@
 DockerRepo: quay.io/ortelius/ms-scorecard
-DockerSha: 01c998eae49a
-DockerTag: main-v10.0.0.25-g7bc2d93
+DockerSha: 85e26b0a3913
+DockerTag: main-v10.0.0.28-g8993511
