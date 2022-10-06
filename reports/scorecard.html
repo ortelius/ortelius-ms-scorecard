@@ -18,7 +18,7 @@
 <head>
     <title id="Description">Compliance Scorecard</title>  
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/ju/jqc-1.12.4/dt-1.12.1/rg-1.2.0/datatables.min.css"/>
-    <link rel="stylesheet" type="text/css" href="/reports/devops_frydesign.css"/>
+    <link rel="stylesheet" type="text/css" href="/dmadminweb/css/devops_frydesign.css"/>
 
     <script type="text/javascript" src="https://cdn.datatables.net/v/ju/jqc-1.12.4/dt-1.12.1/rg-1.2.0/datatables.min.js"></script>    
     <script type="text/javascript">
@@ -35,12 +35,13 @@
      }
    }
 
-  function toTitleCase(str) {
-    str = str.replace('_',' ')
-    return str.replace(/\w\S*/g, function(txt){
-        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-    });
+function toTitleCase(str) {
+  str = str.toLowerCase().split('_');
+  for (var i = 0; i < str.length; i++) {
+    str[i] = str[i].charAt(0).toUpperCase() + str[i].slice(1); 
   }
+  return str.join(' ');
+}
       		
   $(document).ready(function () 
   {  
@@ -64,7 +65,7 @@
         {
           var name = toTitleCase(cols[i].name);
           cols[i].name = name
-          if (name == 'Application' || name == "Component")
+          if (name == 'Application' || name == "Component" || name == "Domain")
             $('#reports > thead >tr').append('<th>' + name + '</th>');
           else
             $('#reports > thead >tr').append('<th class="rotate"><div><div class="textH">' + name + '</div></div></th>');
@@ -90,22 +91,35 @@
               render: function (data, type, row) {
                   return '';
               },
-              targets: [0, 2, 3, 4],
+              targets: [0, 2, 3, 4, 7],
           },
+          {
+              // The `data` parameter refers to the data for the cell (defined by the
+              // `data` option, which defaults to the column being worked with, in
+              // this case `data: 0`.
+              render: function (data, type, row) {
+                if (data == -1)
+                  return '';
+                return data;
+              },
+              targets: [8, 9, 10, 11, 12],
+          },          
           {
             render: function ( data, type, row ) {
                 return data + '%';
             },
-            targets: [6, 7]
+            targets: [5, 6]
           }
         ],
         'rowCallback': function(row, data, index){
             (data['readme'] == 'Y')  ? $(row).find('td:eq(2)').css('background-color', 'green') : $(row).find('td:eq(2)').css('background-color', 'red'); 
             (data['license'] == 'Y') ? $(row).find('td:eq(3)').css('background-color', 'green') : $(row).find('td:eq(3)').css('background-color', 'red');
             (data['swagger'] == 'Y') ? $(row).find('td:eq(4)').css('background-color', 'green') : $(row).find('td:eq(4)').css('background-color', 'red');   
+            (data['git_trigger'] == 'Y') ? $(row).find('td:eq(7)').css('background-color', 'green') : $(row).find('td:eq(7)').css('background-color', 'red');   
+
 
             lineschanged = data['lineschanged'];
-            $(row).find('td:eq(5)').css('color', 'white');
+            $(row).find('td:eq(5)').css('color', 'black');
 
             if (lineschanged <= 20)  
               $(row).find('td:eq(5)').css('background-color', 'green') 
@@ -115,6 +129,7 @@
               $(row).find('td:eq(5)').css('background-color', 'red');      
               
             committers = data['committers'];
+            $(row).find('td:eq(6)').css('color', 'black');
 
             if (committers >= 80)  
               $(row).find('td:eq(6)').css('background-color', 'green') 
@@ -122,6 +137,66 @@
               $(row).find('td:eq(6)').css('background-color', 'yellow');    
             else
               $(row).find('td:eq(6)').css('background-color', 'red');  
+
+            sonar_bugs = data['sonar_bugs'];
+            $(row).find('td:eq(8)').css('color', 'black');
+
+            if (sonar_bugs == -1)  
+              $(row).find('td:eq(8)').css('background-color', 'white') 
+            else if (sonar_bugs <= 5)  
+              $(row).find('td:eq(8)').css('background-color', 'green') 
+            else if (sonar_bugs <= 20) 
+              $(row).find('td:eq(8)').css('background-color', 'yellow');    
+            else
+              $(row).find('td:eq(8)').css('background-color', 'red');  
+
+            sonar_code_smells = data['sonar_code_smells'];
+            $(row).find('td:eq(9)').css('color', 'black');
+
+            if (sonar_code_smells == -1)  
+              $(row).find('td:eq(9)').css('background-color', 'white') 
+            else if (sonar_code_smells <= 5)  
+              $(row).find('td:eq(9)').css('background-color', 'green') 
+            else if (sonar_code_smells <= 20) 
+              $(row).find('td:eq(9)').css('background-color', 'yellow');    
+            else
+              $(row).find('td:eq(9)').css('background-color', 'red');  
+
+            sonar_violations = data['sonar_violations'];
+            $(row).find('td:eq(10)').css('color', 'black');
+
+            if (sonar_violations == -1)  
+              $(row).find('td:eq(10)').css('background-color', 'white') 
+            else if (sonar_violations <= 5)  
+              $(row).find('td:eq(10)').css('background-color', 'green') 
+            else if (sonar_violations <= 20) 
+              $(row).find('td:eq(10)').css('background-color', 'yellow');    
+            else
+              $(row).find('td:eq(10)').css('background-color', 'red');  
+
+            sonar_project_status = data['sonar_project_status'];
+            $(row).find('td:eq(11)').css('color', 'black');
+
+            if (sonar_project_status == 'NONE')  
+              $(row).find('td:eq(11)').css('background-color', 'red') 
+            else if (sonar_project_status == 'OK')  
+              $(row).find('td:eq(11)').css('background-color', 'green') 
+            else if (sonar_project_status == 'WARN') 
+              $(row).find('td:eq(11)').css('background-color', 'yellow');    
+            else
+              $(row).find('td:eq(11)').css('background-color', 'white');  
+
+            vericode_score = data['vericode_score'];
+            $(row).find('td:eq(12)').css('color', 'black');
+
+            if (vericode_score == -1)  
+              $(row).find('td:eq(12)').css('background-color', 'white') 
+            else if (vericode_score >= 80)  
+              $(row).find('td:eq(12)').css('background-color', 'green') 
+            else if (vericode_score >= 50) 
+              $(row).find('td:eq(12)').css('background-color', 'yellow');    
+            else
+              $(row).find('td:eq(12)').css('background-color', 'red');                 
           }            
     });
   });
@@ -130,9 +205,9 @@
     </script>
 </head>
 <body class='default'>
-     <div style="text-align:center;"><H2 id="report_title" class="reports" style="color:black;">Compliance Scorecard</H2><p></div>
+     <div style="text-align:center;"><H2 id="report_title" style="color:black;">Compliance Scorecard</H2></div>
      <div id="dataTable"></div>
-       <div style='margin-top: 75px;'>
+       <div style='margin-top: 120px;'>
         <div style='float: left;'>
 		<table id="reports" class="display" style="width:100%">
         <thead>

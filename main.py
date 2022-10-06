@@ -136,7 +136,7 @@ class Message(BaseModel):
              }
          }
          )
-async def getScoreCard(request: Request, domain: Union[str, None] = None):
+async def getScoreCard(request: Request, domain: Union[str, None] = None, env: Union[str, None] = None):
 
     response_data = []
     domname = ""
@@ -171,13 +171,14 @@ async def getScoreCard(request: Request, domain: Union[str, None] = None):
                     data.columns = []
                     for col in cursor.description:
                         column = {"name": col[0], "data": col[0]}
-                        data.columns.append(column)
+                        if (col[0] != 'domain'):
+                            data.columns.append(column)
 
                     row = cursor.fetchone()
                     rows = []
                     while row:
                         rowdict = {}
-                        i = 0
+                        i = 1
                         for col in data.columns:
                             name = col.get('name')
                             value = row[i]
