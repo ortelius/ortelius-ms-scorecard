@@ -133,7 +133,7 @@ function toTitleCase(str) {
             $(row).find('td:eq(8)').css('color', 'white');
 
             if (sonar_bugs == -1)  
-              $(row).find('td:eq(9)').css('background-color', 'white') 
+              ()=>{}
             else if (sonar_bugs <= 5)  
               $(row).find('td:eq(9)').css('background-color', 'green') 
             else if (sonar_bugs <= 20) 
@@ -145,7 +145,7 @@ function toTitleCase(str) {
             $(row).find('td:eq(10)').css('color', 'white');
 
             if (sonar_code_smells == -1)  
-              $(row).find('td:eq(10)').css('background-color', 'white') 
+              ()=>{} 
             else if (sonar_code_smells <= 5)  
               $(row).find('td:eq(10)').css('background-color', 'green') 
             else if (sonar_code_smells <= 20) 
@@ -157,7 +157,7 @@ function toTitleCase(str) {
             $(row).find('td:eq(11)').css('color', 'white');
 
             if (sonar_violations == -1)  
-              $(row).find('td:eq(11)').css('background-color', 'white') 
+              ()=>{}
             else if (sonar_violations <= 5)  
               $(row).find('td:eq(11)').css('background-color', 'green') 
             else if (sonar_violations <= 20) 
@@ -175,13 +175,13 @@ function toTitleCase(str) {
             else if (sonar_project_status == 'WARN') 
               $(row).find('td:eq(12)').css('background-color', 'orange');    
             else
-              $(row).find('td:eq(12)').css('background-color', 'white');  
+              ()=>{}  
 
             vericode_score = data['vericode_score'];
             $(row).find('td:eq(13)').css('color', 'white');
 
             if (vericode_score == -1)  
-              $(row).find('td:eq(13)').css('background-color', 'white') 
+              ()=>{}
             else if (vericode_score >= 80)  
               $(row).find('td:eq(13)').css('background-color', 'green') 
             else if (vericode_score >= 50) 
