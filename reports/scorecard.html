@@ -103,89 +103,89 @@ function toTitleCase(str) {
           }
         ],
         'rowCallback': function(row, data, index){
-            (data['license'] == 'Y')  ? $(row).find('td:eq(2)').css('background-color', 'green') : $(row).find('td:eq(2)').css('background-color', 'red'); 
-            (data['readme'] == 'Y') ? $(row).find('td:eq(3)').css('background-color', 'green') : $(row).find('td:eq(3)').css('background-color', 'red');
-            (data['swagger'] == 'Y') ? $(row).find('td:eq(4)').css('background-color', 'green') : $(row).find('td:eq(4)').css('background-color', 'red');  
+            (data['license'] == 'Y')  ? $(row).find('td:eq(2)').css({'background-color': 'green', 'color': 'white', 'text-align': 'center'}).css : $(row).find('td:eq(2)').css({'background-color': 'red', 'color': 'white', 'text-align': 'center'}); 
+            (data['readme'] == 'Y') ? $(row).find('td:eq(3)').css({'background-color': 'green', 'color': 'white', 'text-align': 'center'}) : $(row).find('td:eq(3)').css({'background-color': 'red', 'color': 'white', 'text-align': 'center'});
+            (data['swagger'] == 'Y') ? $(row).find('td:eq(4)').css({'background-color': 'green', 'color': 'white', 'text-align': 'center'}) : $(row).find('td:eq(4)').css({'background-color': 'red', 'color': 'white', 'text-align': 'center'});  
             if (data['git_trigger'] != '')
-               ('Started by user' in data['git_trigger']) ? $(row).find('td:eq(8)').css('background-color', 'red') : $(row).find('td:eq(7)').css('background-color', 'green');   
+               ('Started by user' in data['git_trigger']) ? $(row).find('td:eq(8)').css({'background-color': 'red', 'color': 'white', 'text-align': 'center'}) : $(row).find('td:eq(7)').css({'background-color': 'green', 'color': 'white', 'text-align': 'center'});   
 
             lineschanged = data['lineschanged'];
-            $(row).find('td:eq(5)').css('color', 'black');
+            $(row).find('td:eq(5)').css('color', 'white');
 
             if (lineschanged <= 20)  
               $(row).find('td:eq(5)').css('background-color', 'green') 
             else if (lineschanged <= 50) 
-              $(row).find('td:eq(5)').css('background-color', 'yellow');    
+              $(row).find('td:eq(5)').css('background-color', 'orange');    
             else
               $(row).find('td:eq(5)').css('background-color', 'red');      
               
             committers = data['committers'];
-            $(row).find('td:eq(6)').css('color', 'black');
+            $(row).find('td:eq(6)').css('color', 'white');
 
             if (committers >= 80)  
               $(row).find('td:eq(6)').css('background-color', 'green') 
             else if (committers >= 50) 
-              $(row).find('td:eq(6)').css('background-color', 'yellow');    
+              $(row).find('td:eq(6)').css('background-color', 'orange');    
             else
               $(row).find('td:eq(6)').css('background-color', 'red');  
 
             sonar_bugs = data['sonar_bugs'];
-            $(row).find('td:eq(8)').css('color', 'black');
+            $(row).find('td:eq(8)').css('color', 'white');
 
             if (sonar_bugs == -1)  
               $(row).find('td:eq(9)').css('background-color', 'white') 
             else if (sonar_bugs <= 5)  
               $(row).find('td:eq(9)').css('background-color', 'green') 
             else if (sonar_bugs <= 20) 
-              $(row).find('td:eq(9)').css('background-color', 'yellow');    
+              $(row).find('td:eq(9)').css('background-color', 'orange');    
             else
               $(row).find('td:eq(9)').css('background-color', 'red');  
 
             sonar_code_smells = data['sonar_code_smells'];
-            $(row).find('td:eq(10)').css('color', 'black');
+            $(row).find('td:eq(10)').css('color', 'white');
 
             if (sonar_code_smells == -1)  
               $(row).find('td:eq(10)').css('background-color', 'white') 
             else if (sonar_code_smells <= 5)  
               $(row).find('td:eq(10)').css('background-color', 'green') 
             else if (sonar_code_smells <= 20) 
-              $(row).find('td:eq(10)').css('background-color', 'yellow');    
+              $(row).find('td:eq(10)').css('background-color', 'orange');    
             else
               $(row).find('td:eq(10)').css('background-color', 'red');  
 
             sonar_violations = data['sonar_violations'];
-            $(row).find('td:eq(11)').css('color', 'black');
+            $(row).find('td:eq(11)').css('color', 'white');
 
             if (sonar_violations == -1)  
               $(row).find('td:eq(11)').css('background-color', 'white') 
             else if (sonar_violations <= 5)  
               $(row).find('td:eq(11)').css('background-color', 'green') 
             else if (sonar_violations <= 20) 
-              $(row).find('td:eq(11)').css('background-color', 'yellow');    
+              $(row).find('td:eq(11)').css('background-color', 'orange');    
             else
               $(row).find('td:eq(11)').css('background-color', 'red');  
 
             sonar_project_status = data['sonar_project_status'];
-            $(row).find('td:eq(12)').css('color', 'black');
+            $(row).find('td:eq(12)').css('color', 'white');
 
             if (sonar_project_status == 'NONE')  
               $(row).find('td:eq(12)').css('background-color', 'red') 
             else if (sonar_project_status == 'OK')  
               $(row).find('td:eq(12)').css('background-color', 'green') 
             else if (sonar_project_status == 'WARN') 
-              $(row).find('td:eq(12)').css('background-color', 'yellow');    
+              $(row).find('td:eq(12)').css('background-color', 'orange');    
             else
               $(row).find('td:eq(12)').css('background-color', 'white');  
 
             vericode_score = data['vericode_score'];
-            $(row).find('td:eq(13)').css('color', 'black');
+            $(row).find('td:eq(13)').css('color', 'white');
 
             if (vericode_score == -1)  
               $(row).find('td:eq(13)').css('background-color', 'white') 
             else if (vericode_score >= 80)  
               $(row).find('td:eq(13)').css('background-color', 'green') 
             else if (vericode_score >= 50) 
-              $(row).find('td:eq(13)').css('background-color', 'yellow');    
+              $(row).find('td:eq(13)').css('background-color', 'orange');    
             else
               $(row).find('td:eq(13)').css('background-color', 'red');                 
           }            
