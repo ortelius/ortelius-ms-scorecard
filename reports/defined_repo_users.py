@@ -12,7 +12,7 @@ import click
 
 def main(project, repo, bburl, userid, password):
     users = {}
-    stash = stashy.connect(bburl, userid, password)
+    stash = stashy.connect(bburl, userid, password, verify=False)
     projects = stash.projects.list()
 
     if (len(projects) == 0):

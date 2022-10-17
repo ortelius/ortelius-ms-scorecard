@@ -89,20 +89,11 @@ function toTitleCase(str) {
               // `data` option, which defaults to the column being worked with, in
               // this case `data: 0`.
               render: function (data, type, row) {
-                  return '';
-              },
-              targets: [0, 2, 3, 4, 7],
-          },
-          {
-              // The `data` parameter refers to the data for the cell (defined by the
-              // `data` option, which defaults to the column being worked with, in
-              // this case `data: 0`.
-              render: function (data, type, row) {
                 if (data == -1)
                   return '';
                 return data;
               },
-              targets: [8, 9, 10, 11, 12],
+              targets: [9, 10, 11, 12, 13],
           },          
           {
             render: function ( data, type, row ) {
@@ -112,11 +103,11 @@ function toTitleCase(str) {
           }
         ],
         'rowCallback': function(row, data, index){
-            (data['readme'] == 'Y')  ? $(row).find('td:eq(2)').css('background-color', 'green') : $(row).find('td:eq(2)').css('background-color', 'red'); 
-            (data['license'] == 'Y') ? $(row).find('td:eq(3)').css('background-color', 'green') : $(row).find('td:eq(3)').css('background-color', 'red');
-            (data['swagger'] == 'Y') ? $(row).find('td:eq(4)').css('background-color', 'green') : $(row).find('td:eq(4)').css('background-color', 'red');   
-            (data['git_trigger'] == 'Y') ? $(row).find('td:eq(7)').css('background-color', 'green') : $(row).find('td:eq(7)').css('background-color', 'red');   
-
+            (data['license'] == 'Y')  ? $(row).find('td:eq(2)').css('background-color', 'green') : $(row).find('td:eq(2)').css('background-color', 'red'); 
+            (data['readme'] == 'Y') ? $(row).find('td:eq(3)').css('background-color', 'green') : $(row).find('td:eq(3)').css('background-color', 'red');
+            (data['swagger'] == 'Y') ? $(row).find('td:eq(4)').css('background-color', 'green') : $(row).find('td:eq(4)').css('background-color', 'red');  
+            if (data['git_trigger'] != '')
+               ('Started by user' in data['git_trigger']) ? $(row).find('td:eq(8)').css('background-color', 'red') : $(row).find('td:eq(7)').css('background-color', 'green');   
 
             lineschanged = data['lineschanged'];
             $(row).find('td:eq(5)').css('color', 'black');
@@ -142,61 +133,61 @@ function toTitleCase(str) {
             $(row).find('td:eq(8)').css('color', 'black');
 
             if (sonar_bugs == -1)  
-              $(row).find('td:eq(8)').css('background-color', 'white') 
-            else if (sonar_bugs <= 5)  
-              $(row).find('td:eq(8)').css('background-color', 'green') 
-            else if (sonar_bugs <= 20) 
-              $(row).find('td:eq(8)').css('background-color', 'yellow');    
-            else
-              $(row).find('td:eq(8)').css('background-color', 'red');  
-
-            sonar_code_smells = data['sonar_code_smells'];
-            $(row).find('td:eq(9)').css('color', 'black');
-
-            if (sonar_code_smells == -1)  
               $(row).find('td:eq(9)').css('background-color', 'white') 
-            else if (sonar_code_smells <= 5)  
+            else if (sonar_bugs <= 5)  
               $(row).find('td:eq(9)').css('background-color', 'green') 
-            else if (sonar_code_smells <= 20) 
+            else if (sonar_bugs <= 20) 
               $(row).find('td:eq(9)').css('background-color', 'yellow');    
             else
               $(row).find('td:eq(9)').css('background-color', 'red');  
 
-            sonar_violations = data['sonar_violations'];
+            sonar_code_smells = data['sonar_code_smells'];
             $(row).find('td:eq(10)').css('color', 'black');
 
-            if (sonar_violations == -1)  
+            if (sonar_code_smells == -1)  
               $(row).find('td:eq(10)').css('background-color', 'white') 
-            else if (sonar_violations <= 5)  
+            else if (sonar_code_smells <= 5)  
               $(row).find('td:eq(10)').css('background-color', 'green') 
-            else if (sonar_violations <= 20) 
+            else if (sonar_code_smells <= 20) 
               $(row).find('td:eq(10)').css('background-color', 'yellow');    
             else
               $(row).find('td:eq(10)').css('background-color', 'red');  
 
-            sonar_project_status = data['sonar_project_status'];
+            sonar_violations = data['sonar_violations'];
             $(row).find('td:eq(11)').css('color', 'black');
 
-            if (sonar_project_status == 'NONE')  
-              $(row).find('td:eq(11)').css('background-color', 'red') 
-            else if (sonar_project_status == 'OK')  
+            if (sonar_violations == -1)  
+              $(row).find('td:eq(11)').css('background-color', 'white') 
+            else if (sonar_violations <= 5)  
               $(row).find('td:eq(11)').css('background-color', 'green') 
-            else if (sonar_project_status == 'WARN') 
+            else if (sonar_violations <= 20) 
               $(row).find('td:eq(11)').css('background-color', 'yellow');    
             else
-              $(row).find('td:eq(11)').css('background-color', 'white');  
+              $(row).find('td:eq(11)').css('background-color', 'red');  
 
-            vericode_score = data['vericode_score'];
+            sonar_project_status = data['sonar_project_status'];
             $(row).find('td:eq(12)').css('color', 'black');
 
-            if (vericode_score == -1)  
-              $(row).find('td:eq(12)').css('background-color', 'white') 
-            else if (vericode_score >= 80)  
+            if (sonar_project_status == 'NONE')  
+              $(row).find('td:eq(12)').css('background-color', 'red') 
+            else if (sonar_project_status == 'OK')  
               $(row).find('td:eq(12)').css('background-color', 'green') 
-            else if (vericode_score >= 50) 
+            else if (sonar_project_status == 'WARN') 
               $(row).find('td:eq(12)').css('background-color', 'yellow');    
             else
-              $(row).find('td:eq(12)').css('background-color', 'red');                 
+              $(row).find('td:eq(12)').css('background-color', 'white');  
+
+            vericode_score = data['vericode_score'];
+            $(row).find('td:eq(13)').css('color', 'black');
+
+            if (vericode_score == -1)  
+              $(row).find('td:eq(13)').css('background-color', 'white') 
+            else if (vericode_score >= 80)  
+              $(row).find('td:eq(13)').css('background-color', 'green') 
+            else if (vericode_score >= 50) 
+              $(row).find('td:eq(13)').css('background-color', 'yellow');    
+            else
+              $(row).find('td:eq(13)').css('background-color', 'red');                 
           }            
     });
   });

@@ -94,7 +94,7 @@ steps:
         source /workspace/cloudbuild.sh; \
         cat /workspace/component.toml
         cat /workspace/cyclonedx.json
-        env
+        env | sort
         dh updatecomp --rsp /workspace/component.toml --deppkg "cyclonedx@/workspace/cyclonedx.json";
 
 secrets:
