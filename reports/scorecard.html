@@ -106,8 +106,6 @@ function toTitleCase(str) {
             (data['license'] == 'Y')  ? $(row).find('td:eq(2)').css({'background-color': 'green', 'color': 'white', 'text-align': 'center'}).css : $(row).find('td:eq(2)').css({'background-color': 'red', 'color': 'white', 'text-align': 'center'}); 
             (data['readme'] == 'Y') ? $(row).find('td:eq(3)').css({'background-color': 'green', 'color': 'white', 'text-align': 'center'}) : $(row).find('td:eq(3)').css({'background-color': 'red', 'color': 'white', 'text-align': 'center'});
             (data['swagger'] == 'Y') ? $(row).find('td:eq(4)').css({'background-color': 'green', 'color': 'white', 'text-align': 'center'}) : $(row).find('td:eq(4)').css({'background-color': 'red', 'color': 'white', 'text-align': 'center'});  
-            if (data['git_trigger'] != '')
-               ('Started by user' in data['git_trigger']) ? $(row).find('td:eq(8)').css({'background-color': 'red', 'color': 'white', 'text-align': 'center'}) : $(row).find('td:eq(7)').css({'background-color': 'green', 'color': 'white', 'text-align': 'center'});   
 
             lineschanged = data['lineschanged'];
             $(row).find('td:eq(5)').css('color', 'white');
