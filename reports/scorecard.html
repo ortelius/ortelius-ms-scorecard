@@ -18,7 +18,7 @@
 <head>
     <title id="Description">Compliance Scorecard</title>  
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/ju/jqc-1.12.4/dt-1.12.1/rg-1.2.0/datatables.min.css"/>
-    <link rel="stylesheet" type="text/css" href="/dmadminweb/css/devops_frydesign.css"/>
+    <link rel="stylesheet" type="text/css" href="http://localhost:8181/dmadminweb/css/devops_frydesign.css"/>
 
     <script type="text/javascript" src="https://cdn.datatables.net/v/ju/jqc-1.12.4/dt-1.12.1/rg-1.2.0/datatables.min.js"></script>    
     <script type="text/javascript">
@@ -79,22 +79,41 @@ function toTitleCase(str) {
           sDom: 't<"bottom"lip>',
           columns: cols,
           data: data.data,
-          order: [[0, 'desc'], [1, 'desc']],               
+          order: [[1, 'desc'], [2, 'desc']],               
           rowGroup: {
             dataSrc: [ 'application']
         },
-        columnDefs: [       
+        columnDefs: [
+          {
+              // The `data` parameter refers to the data for the cell (defined by the
+              // `data` option, which defaults to the column being worked with, in
+              // this case `data: 0`.
+              render: function (data, type, row) {
+                if (data == -1)
+                  return '';
+                return data;
+              },
+              targets: [9, 10, 11, 12, 13],
+          },          
           {
             render: function ( data, type, row ) {
                 return data + '%';
             },
             targets: [5, 6]
-          }
+          },
+          {
+            render: function (data, type, row) {
+               return '';
+              },
+              targets: [0]
+          },
         ],
         'rowCallback': function(row, data, index){
             (data['license'] == 'Y')  ? $(row).find('td:eq(2)').css({'background-color': 'green', 'color': 'white', 'text-align': 'center'}).css : $(row).find('td:eq(2)').css({'background-color': 'red', 'color': 'white', 'text-align': 'center'}); 
             (data['readme'] == 'Y') ? $(row).find('td:eq(3)').css({'background-color': 'green', 'color': 'white', 'text-align': 'center'}) : $(row).find('td:eq(3)').css({'background-color': 'red', 'color': 'white', 'text-align': 'center'});
             (data['swagger'] == 'Y') ? $(row).find('td:eq(4)').css({'background-color': 'green', 'color': 'white', 'text-align': 'center'}) : $(row).find('td:eq(4)').css({'background-color': 'red', 'color': 'white', 'text-align': 'center'});  
+            if (data['git_trigger'] != '')
+               (data['git_trigger'].includes('Started by user')) ? $(row).find('td:eq(8)').css({'background-color': 'red', 'color': 'white', 'text-align': 'center'}) : $(row).find('td:eq(8)').css({'background-color': 'green', 'color': 'white', 'text-align': 'center'});   
 
             lineschanged = data['lineschanged'];
             $(row).find('td:eq(5)').css('color', 'white');

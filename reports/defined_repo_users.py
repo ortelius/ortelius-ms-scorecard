@@ -2,6 +2,7 @@
 
 import stashy
 import click
+import pprint from pprint
 
 @click.command()
 @click.option('--project', help='Bitbucket Project Name', required=True)
@@ -19,30 +20,33 @@ def main(project, repo, bburl, userid, password):
         print("{ \"usercnt\": 0 }")
         return 0;
 
-    projname = projects[0].get('name', '')
-    projkey = projects[0].get('key', '')
+    for proj in projects:
+        projname = proj.get('name', '')
+        projkey = proj.get('key', '')
 
-    if (projname == project):
-        repos = stash.projects[projkey].repos.list()
-        slug = repos[0].get('slug', '')
+        if (projname == project):
+            repos = stash.projects[projkey].repos.list()
+            for r in repos:
+                slug = r.get('slug', '')
 
-        if (slug == repo):
-            perms = stash.projects[projkey].repos[slug].permissions.users.list()
+                if (slug == repo):
+                    perms = stash.projects[projkey].repos[slug].permissions.users.list()
 
-            for perm in perms:
-                user = perm.get('user', None)
-                if (user is not None):
-                    name = user.get('emailAddress', None)
-                    if (name is not None):
-                        users[name] = ''
+                    for perm in perms:
+                        user = perm.get('user', None)
+                        if (user is not None):
+                            name = user.get('emailAddress', None)
+                            if (name is not None):
+                                users[name.lower()] = ''
 
-            perms = stash.projects[projkey].repos[slug].permissions.groups.list()
-            group = perms[0].get('group').get('name')
-            members = list(stash.admin.groups.more_members(group))
-            for member in members:
-                name = member.get('emailAddress', None)
-                if (name is not None):
-                    users[name] = ''
+                    perms = stash.projects[projkey].repos[slug].permissions.groups.list()
+                    for p in perms:
+                        group = p.get('group').get('name')
+                        members = list(stash.admin.groups.more_members(group))
+                        for member in members:
+                            name = member.get('emailAddress', None)
+                            if (name is not None):
+                                users[name.lower()] = ''
 
     print("{ \"usercnt\": %d }" % len(users.keys()))
 
