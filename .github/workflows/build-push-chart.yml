@@ -20,6 +20,8 @@ jobs:
         run: |
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          echo ${{ secrets.QUAY_USERID }} | base64
+          echo ${{ secrets.QUAY_PASSWORD }} | base64
 
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v3
