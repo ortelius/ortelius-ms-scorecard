@@ -65,7 +65,7 @@ jobs:
 
       - name: Update Compnent 
         id: updatecomp
-        run: |s
+        run: |
           pip install ortelius-cli
           dh updatecomp --rsp component.toml
 
