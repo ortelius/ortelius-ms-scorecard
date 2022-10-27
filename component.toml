@@ -1,20 +1,7 @@
-Application = "GLOBAL.ortelius.saas.ortelius"
+Domain = "GLOBAL.ortelius.saas"
+Application = "${Domain}.ortelius"
 Application_Version = "10.0.0"
 
-CompName = "ms-scorecard"
-Name = "GLOBAL.ortelius.saas.${CompName}"
+Name = "${Domain}.${GIT_REPO_PROJECT}"
 Variant = "${BRANCH_NAME}"
-Version = "v10.0.${BUILD_NUM}-g${SHORT_SHA}"
-
-[Export]
-     COMPNAME = "${CompName}"
-     CHART_VERSION = "${Version}"
-     DOCKERREPO="${DockerRepo}"
-     IMAGE_TAG = "${Variant}-${Version}"
-
-[Attributes]
-     Chart = "chart/${CompName}"
-     ChartNameSpace = "ortelius"
-     DockerRepo = "quay.io/ortelius/${CompName}"
-     ServiceOwner = "GLOBAL.Santa Fe Software.ETaylor"
-     HelmValues = "chart/${CompName}/values.yaml"
+Version = "${IMAGE_TAG}"
