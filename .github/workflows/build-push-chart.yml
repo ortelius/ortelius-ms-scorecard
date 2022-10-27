@@ -12,6 +12,7 @@ jobs:
       DHUSER: ${{ secrets.DH_USERID }}
       DHPASS: ${{ secrets.DH_PASSWORD }}
       DOCKERREPO: quay.io/${{ github.repository }}
+      BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
     steps:
       - name: Checkout
         id: checkout
@@ -22,7 +23,6 @@ jobs:
       - name: Set Convenience Env Vars
         id: env
         run: |
-          echo "BRANCH_NAME=${{ github.head_ref || github.ref_name }}" >> $GITHUB_ENV
           echo "GIT_REPO_PROJECT=$(echo $GITHUB_REPOSITORY | cut -f2 -d/)" >> $GITHUB_ENV
           echo "CHART_VERSION=v10.0.${GITHUB_RUN_NUMBER}" >> $GITHUB_ENV
           echo "IMAGE_VERSION=v10.0.${GITHUB_RUN_NUMBER}-g$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
@@ -65,7 +65,7 @@ jobs:
 
       - name: Update Compnent 
         id: updatecomp
-        run: |
+        run: |s
           pip install ortelius-cli
           dh updatecomp --rsp component.toml
 
