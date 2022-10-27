@@ -1,12 +1,9 @@
-name: Release Charts
+name: Build/Push Image and Release Charts
 
 on:
   push:
     branches:
       - main
-    paths:
-      - 'chart/**/Chart.yaml'
-
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -14,21 +11,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          fetch-depth: 0
+          fetch-depth: 2
+
+      - name: Set env
+        run: echo "IMAGE_TAG=\"v10.0.0.${{ github.run_number }}-g$(echo $GITHUB_SHA | cut -c 1-6)\"" >> $GITHUB_ENV
 
       - name: Configure Git
         run: |
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-
-      - name: Install Helm
-        uses: azure/setup-helm@v1
-        with:
-          version: v3.4.0
-
-      - name: Run chart-releaser
-        uses: helm/chart-releaser-action@v1.2.1
-        with:
-          charts_dir: chart
-        env:
-          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          env | sort
