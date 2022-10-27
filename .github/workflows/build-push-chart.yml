@@ -23,7 +23,7 @@ jobs:
       - name: Set env
         id: env
         run: |
-          echo "GIT_REPO_PROJECT=$(echo $GITHUB_REPOSITORY | cut -f2 -d/" >> $GITHUB_ENV
+          echo "GIT_REPO_PROJECT=$(echo $GITHUB_REPOSITORY | cut -f2 -d/)" >> $GITHUB_ENV
           echo "CHART_VERSION=v10.0.${GITHUB_RUN_NUMBER}" >> $GITHUB_ENV
           echo "IMAGE_VERSION=v10.0.${GITHUB_RUN_NUMBER}-g$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
           echo "IMAGE_TAG=${BRANCH_NAME}-v10.0.${GITHUB_RUN_NUMBER}-g$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
