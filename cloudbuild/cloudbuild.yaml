@@ -56,8 +56,8 @@ steps:
       - '-c'
       - |
         source /workspace/cloudbuild.sh; \
-        docker build --tag $$COMPONENT_DOCKERREPO:$$IMAGE_TAG -f /workspace/Dockerfile .; \
-        docker push $$COMPONENT_DOCKERREPO:$$IMAGE_TAG
+        docker build --tag $$COMPONENT_image.repository:$$IMAGE_TAG -f /workspace/Dockerfile .; \
+        docker push $$COMPONENT_image.repository:$$IMAGE_TAG
 
   #syft scan
   - name: 'gcr.io/cloud-builders/docker'
@@ -68,8 +68,8 @@ steps:
       - |
         source /workspace/cloudbuild.sh; \
         curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin; \
-        echo $$COMPONENT_DOCKERREPO:$$IMAGE_TAG; \
-        syft packages $$COMPONENT_DOCKERREPO:$$IMAGE_TAG --scope all-layers -o cyclonedx-json > /workspace/cyclonedx.json; \
+        echo $$COMPONENT_image.repository:$$IMAGE_TAG; \
+        syft packages $$COMPONENT_image.repository:$$IMAGE_TAG --scope all-layers -o cyclonedx-json > /workspace/cyclonedx.json; \
         cat /workspace/cyclonedx.json;
 
   # Get image id
@@ -80,7 +80,7 @@ steps:
       - '-c'
       - |
         source /workspace/cloudbuild.sh; \
-        echo export DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' $$COMPONENT_DOCKERREPO:$$IMAGE_TAG | cut -d: -f2 | cut -c-12) >> /workspace/cloudbuild.sh
+        echo export DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' $$COMPONENT_image.repository:$$IMAGE_TAG | cut -d: -f2 | cut -c-12) >> /workspace/cloudbuild.sh
 
   # Capture new component version in DeployHub
   - name: python

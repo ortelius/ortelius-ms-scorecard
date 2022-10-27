@@ -7,7 +7,7 @@ Version = "v10.0.0.${BUILDNUM}-g${SHORT_SHA}"
 
 [Export]
      IMAGE_TAG = "${Variant}-${Version}"
-     COMPONENT_DOCKERREPO="${DockerRepo}"
+     COMPONENT_image.repository="${image.repository}"
 
 [Attributes]
      BuildId = "${BUILD_ID}"
@@ -16,9 +16,9 @@ Version = "v10.0.0.${BUILDNUM}-g${SHORT_SHA}"
      ChartNameSpace = "ortelius"
      CustomAction = "GLOBAL.ArgoHelmAction"
      DockerBuildDate = "${BLDDATE}"
-     DockerRepo = "quay.io/ortelius/ms-scorecard"
-     DockerSha = "${DIGEST}"
-     DockerTag = "${IMAGE_TAG}"
+     image.repository = "quay.io/ortelius/ms-scorecard"
+     image.sha = "${DIGEST}"
+     image.tag = "${IMAGE_TAG}"
      GitCommit = "${SHORT_SHA}"
      License = "/workspace/LICENSE"
      Readme = "/workspace/README.md"
