@@ -26,6 +26,8 @@ jobs:
         with:
           context: .
           push: true
+          username: ${{ secrets.QUAY_USERID }}
+          password: ${{ secrets.QUAY_PASSWORD }}
           tags: quay.io/ortelius/ms-scorecard:${{ env.IMAGE_TAG }}
 
       - name: Install Helm
