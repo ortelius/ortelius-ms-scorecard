@@ -18,4 +18,17 @@ jobs:
 
       - name: Configure Git
         run: |
-          env | sort
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: true
+          tags: quay.io/ortelius/ms-scorecard:${{ env.IMAGE_TAG }}
+
+      - name: Install Helm
+        uses: azure/setup-helm@v1
+        with:
+          version: v3.4.0
