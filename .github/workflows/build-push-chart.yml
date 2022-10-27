@@ -55,6 +55,7 @@ jobs:
         run: |
             curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b .
             ./syft packages ${{ env.DOCKERREPO }}:${{ env.IMAGE_TAG }} --scope all-layers -o cyclonedx-json > cyclonedx.json
+            cat cyclonedx.json
 
       - name: Update Values and Chart
         id: chart
