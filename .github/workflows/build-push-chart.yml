@@ -9,8 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DHURL: https://console.deployhub.com
-      DHUSER: ${{ secrets.DH_USERID }}
-      DHPASS: ${{ secrets.DH_PASSWORD }}
+      DHUSER: ${{ secrets.DHUSER }}
+      DHPASS: ${{ secrets.DHPASS }}
       DOCKERREPO: quay.io/${{ github.repository }}
       BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
     steps:
