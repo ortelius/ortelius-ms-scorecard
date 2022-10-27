@@ -54,12 +54,13 @@ jobs:
         id: chart
         run: |
             sudo go install github.com/mikefarah/yq/v4@latest
-            yq e '.image.repository |= "${{ env.DOCKERREPO }}"' -i chart/${GIT_REPO_PROJECT}/values.yaml
-            yq e '.image.tag |= "${IMAGE_TAG}"' -i chart/${GIT_REPO_PROJECT}/values.yaml
-            yq e '.image.sha |= "${{ steps.build.outputs.digest }}"' -i chart/${GIT_REPO_PROJECT}/values.yaml
-            yq e '.version |= "${CHART_VERSION}"' -i chart/${GIT_REPO_PROJECT}/Chart.yaml
-            yq e '.appVersion |= "${CHART_VERSION}"' -i chart/${GIT_REPO_PROJECT}/Chart.yaml
+            yq e '.image.repository |= "${{ env.DOCKERREPO }}"' -i chart/${{ env.GIT_REPO_PROJECT }}/values.yaml
+            yq e '.image.tag |= "${{ env.IMAGE_TAG }}"' -i chart/${{ env.GIT_REPO_PROJECT }}/values.yaml
+            yq e '.image.sha |= "${{ steps.build.outputs.digest }}"' -i chart/${{ env.GIT_REPO_PROJECT }}/values.yaml
+            yq e '.version |= "${{ env.CHART_VERSION }}"' -i chart/${{ env.GIT_REPO_PROJECT }}/Chart.yaml
+            yq e '.appVersion |= "${{ env.CHART_VERSION }}"' -i chart/${{ env.GIT_REPO_PROJECT }}/Chart.yaml
             echo "DIGEST=${{ steps.build.outputs.digest }}" >> $GITHUB_ENV
+            cat chart/${{ env.GIT_REPO_PROJECT }}/Chart.yaml
 
       - name: Update Compnent 
         id: updatecomp
