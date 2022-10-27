@@ -3,7 +3,7 @@ name: Build/Push Image and Release Charts
 on:
   push:
     branches:
-      - main
+      - dev
 jobs:
   release:
     runs-on: ubuntu-latest
