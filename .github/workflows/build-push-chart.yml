@@ -27,27 +27,21 @@ jobs:
           echo "CHART_VERSION=v10.0.${GITHUB_RUN_NUMBER}" >> $GITHUB_ENV
           echo "IMAGE_VERSION=v10.0.${GITHUB_RUN_NUMBER}-g$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
           echo "IMAGE_TAG=${BRANCH_NAME}-v10.0.${GITHUB_RUN_NUMBER}-g$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
+          echo "REGISTRY=$(echo ${{ env.DOCKERREPO }} | cut -f1 -d/)" >> $GITHUB_ENV
 
       - name: Configure Git
         id: git
         run: |
-          env | sort
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-
-      - name: Login to Quay
-        id: login
-        uses: docker/login-action@v2
-        with:
-          registry: quay.io
-          username: ${{ secrets.QUAY_USERID }}
-          password: ${{ secrets.QUAY_PASSWORD }}
 
       - name: Build and Push Docker Image
         id: build
         uses: docker/build-push-action@v3
         with:
           push: true
+          username: ${{ secrets.QUAY_USERID }}
+          password: ${{ secrets.QUAY_PASSWORD }}
           tags: ${{ env.DOCKERREPO }}:${{ env.IMAGE_TAG }}
 
       - name: Update Values and Chart
@@ -63,7 +57,7 @@ jobs:
 
       - name: Update Compnent 
         id: updatecomp
-        run:
+        run: |s
           pip install ortelius-cli
           dh updatecomp --rsp component.toml
 
