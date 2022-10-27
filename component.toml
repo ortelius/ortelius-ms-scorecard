@@ -4,4 +4,4 @@ Application_Version = "10.0.0"
 
 Name = "${Domain}.${GIT_REPO_PROJECT}"
 Variant = "${BRANCH_NAME}"
-Version = "${IMAGE_TAG}"
+Version = "${IMAGE_VERSION}"

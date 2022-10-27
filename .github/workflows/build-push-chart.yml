@@ -17,6 +17,8 @@ jobs:
       - name: Checkout
         id: checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
 
       - name: Set Convenience Env Vars
         id: env
@@ -53,6 +55,7 @@ jobs:
         run: |
             curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b .
             ./syft packages ${{ env.DOCKERREPO }}:${{ env.IMAGE_TAG }} --scope all-layers -o cyclonedx-json > cyclonedx.json
+            cat cyclonedx.json
 
       - name: Update Values and Chart
         id: chart
@@ -69,6 +72,8 @@ jobs:
         id: updatecomp
         run: |
           pip install ortelius-cli
+          dh envscript --envvars component.toml --envvars_sh env.sh
+          source env.sh
           dh updatecomp --rsp component.toml --deppkg cyclonedx@cyclonedx.json
 
       - name: Install Helm
