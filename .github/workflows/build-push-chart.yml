@@ -46,7 +46,7 @@ jobs:
         run: |
             sudo go install github.com/mikefarah/yq/v4@latest
             yq e '.image.tag |= "${{ env.IMAGE_TAG }}"' -i chart/ms-scorecard/values.yaml
-            yq e '.image.sha |= "${{ ${{ steps.tests.outputs.build.Digest }}"' -i chart/ms-scorecard/values.yaml
+            yq e '.image.sha |= "${{ steps.tests.outputs.build.Digest }}"' -i chart/ms-scorecard/values.yaml
             yq e '.version |= "10.0.${{ github.run_number }}"' -i chart/ms-scorecard/Chart.yaml
             yq e '.appVersion |= "10.0.0+${{ github.run_number }}"' -i chart/ms-scorecard/Chart.yaml
             cat chart/ms-scorecard/values.yaml
