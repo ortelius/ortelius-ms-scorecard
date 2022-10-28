@@ -60,10 +60,10 @@ jobs:
         run: |
             sudo go install github.com/mikefarah/yq/v4@latest
             yq e '.image.repository |= "${{ env.REGISTRY }}/${{ github.repository }}"' -i chart/${{ github.event.repository.name }}/values.yaml
-            yq e '.image.tag |= "${{ env.IMAGE_TAG }}"' -i chart/$${{ github.event.repository.name }}/values.yaml
+            yq e '.image.tag |= "${{ env.IMAGE_TAG }}"' -i chart/${{ github.event.repository.name }}/values.yaml
             yq e '.image.sha |= "${{ steps.build.outputs.digest }}"' -i chart/${{ github.event.repository.name }}/values.yaml
-            yq e '.version |= "${{ env.CHART_VERSION }}"' -i chart/$${{ github.event.repository.name }}/Chart.yaml
-            yq e '.appVersion |= "${{ env.CHART_VERSION }}"' -i chart/$${{ github.event.repository.name }}/Chart.yaml
+            yq e '.version |= "${{ env.CHART_VERSION }}"' -i chart/${{ github.event.repository.name }}/Chart.yaml
+            yq e '.appVersion |= "${{ env.CHART_VERSION }}"' -i chart/${{ github.event.repository.name }}/Chart.yaml
             echo "DIGEST=${{ steps.build.outputs.digest }}" >> $GITHUB_ENV
 
       - name: Update Compnent 
