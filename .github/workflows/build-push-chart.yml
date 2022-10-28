@@ -13,6 +13,7 @@ jobs:
       DHUSER: ${{ secrets.DHUSER }}
       DHPASS: ${{ secrets.DHPASS }}
       REGISTRY: quay.io
+      COMPNAME: ${{ github.event.repository.name }}
     steps:
       - name: Checkout
         id: checkout

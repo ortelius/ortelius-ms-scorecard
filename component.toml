@@ -2,6 +2,6 @@ Domain = "GLOBAL.ortelius.saas"
 Application = "${Domain}.ortelius"
 Application_Version = "10.0.0"
 
-Name = "${Domain}.${GIT_REPO_PROJECT}"
-Variant = "${BRANCH_NAME}"
+Name = "${Domain}.${COMPNAME}"
+Variant = "${GIT_BRANCH}"
 Version = "${IMAGE_VERSION}"
