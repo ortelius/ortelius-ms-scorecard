@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths-ignore:
-      - chart/**
+      - "chart/**"
 jobs:
   release:
     runs-on: ubuntu-latest
