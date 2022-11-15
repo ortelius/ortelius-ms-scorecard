@@ -50,13 +50,6 @@ jobs:
           push: true
           tags: ${{ env.REGISTRY }}/${{ github.repository }}:${{ env.IMAGE_TAG }}
 
-      - name: Generate SBOM
-        id: sbom
-        run: |
-            curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b .
-            ./syft packages ${{ env.REGISTRY }}/${{ github.repository }}:${{ env.IMAGE_TAG }} --scope all-layers -o cyclonedx-json > cyclonedx.json
-            cat cyclonedx.json
-
       - name: Update Values and Chart
         id: chart
         run: |
@@ -72,6 +65,13 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Update chart and values
+
+      - name: Generate SBOM
+        id: sbom
+        run: |
+            curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b .
+            ./syft packages ${{ env.REGISTRY }}/${{ github.repository }}:${{ env.IMAGE_TAG }} --scope all-layers -o cyclonedx-json > cyclonedx.json
+            cat cyclonedx.json
 
       - name: Update Compnent 
         id: updatecomp
@@ -90,7 +90,6 @@ jobs:
         uses: helm/chart-releaser-action@v1.4.1
         with:
           charts_dir: chart
-          context: .
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
