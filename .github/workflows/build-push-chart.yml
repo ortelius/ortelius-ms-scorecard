@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - chart/**
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -66,6 +68,11 @@ jobs:
             yq e '.appVersion |= "${{ env.CHART_VERSION }}"' -i chart/${{ github.event.repository.name }}/Chart.yaml
             echo "DIGEST=${{ steps.build.outputs.digest }}" >> $GITHUB_ENV
 
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Update chart and values
+
       - name: Update Compnent 
         id: updatecomp
         run: |
@@ -83,6 +90,7 @@ jobs:
         uses: helm/chart-releaser-action@v1.4.1
         with:
           charts_dir: chart
+          context: .
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
