@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
-import stashy
+from pprint import pprint
+
 import click
-import pprint from pprint
+import stashy
 
 @click.command()
 @click.option('--project', help='Bitbucket Project Name', required=True)

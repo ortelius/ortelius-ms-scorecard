@@ -16,9 +16,9 @@
 -->
 <html lang="en">
 <head>
-    <title id="Description">Compliance Scorecard</title>  
+    <title id="Description">Compliance</title>  
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/ju/jqc-1.12.4/dt-1.12.1/rg-1.2.0/datatables.min.css"/>
-    <link rel="stylesheet" type="text/css" href="http://localhost:8181/dmadminweb/css/devops_frydesign.css"/>
+    <link rel="stylesheet" type="text/css" href="https://console.deployhub.com/dmadminweb/css/devops_frydesign.css"/>
 
     <script type="text/javascript" src="https://cdn.datatables.net/v/ju/jqc-1.12.4/dt-1.12.1/rg-1.2.0/datatables.min.js"></script>    
     <script type="text/javascript">
@@ -48,16 +48,86 @@ function toTitleCase(str) {
     var url = "/msapi/scorecard";
 
     var domain = getParameterByName("domain");
+    var frequency = getParameterByName("frequency");
+    var lag = getParameterByName("lag");
 
     if (domain.length > 0)
      url = "/msapi/scorecard?domain=" + domain;
 
+    columnDefs = [];
+
+    if (lag.length > 0)
+    {
+     if (url.includes('?'))
+       url = url + "&lag=" + lag;
+     else
+       url = "/msapi/scorecard?lag=" + lag;
+    }  
+    else if (frequency.length > 0)
+    {
+     if (url.includes('?'))
+       url = url + "&frequency=" + frequency;
+     else
+       url = "/msapi/scorecard?frequency=" + frequency;
+     
+       columnDefs = [
+        {
+          targets: 1,
+          className: 'dt-body-nowrap'
+        }
+       ]
+    }   
+    else
+    {
+      columnDefs = [
+          {
+              // The `data` parameter refers to the data for the cell (defined by the
+              // `data` option, which defaults to the column being worked with, in
+              // this case `data: 0`.
+              render: function (data, type, row) {
+                if (data == -1)
+                  return '';
+                return data;
+              },
+              targets: [9, 10, 11, 12, 13],
+          },          
+          {
+            render: function ( data, type, row ) {
+              if (data != '')
+                return data + '%';
+              else 
+                return '';
+            },
+            targets: [5, 6]
+          },
+          {
+            render: function (data, type, row) {
+               return '';
+              },
+              targets: [0]
+          },
+        ];
+    }
+
     $.getJSON(url,
         function(data) {
-  
+ 
         domain = data.domain;
 
-        $("#report_title").html("Compliance Scorecard for " + domain);
+        rowGroup = {dataSrc: [ 'application'] };
+
+        if (frequency.length > 0)
+        {
+          $('#report_title').html("Deployment Frequency Per Week Per Environment");
+          rowGroup = null;
+        }
+        else if (lag.length > 0)
+        {
+          $('#report_title').html("Lag Between The Current Deployment And Previous One Per Environment");
+          rowGroup = null;          
+        }
+        else 
+          $("#report_title").html("Compliance Scorecard for " + domain);
         
         cols = data.columns;
 
@@ -80,63 +150,48 @@ function toTitleCase(str) {
           columns: cols,
           data: data.data,
           order: [[1, 'desc'], [2, 'desc']],               
-          rowGroup: {
-            dataSrc: [ 'application']
-        },
-        columnDefs: [
-          {
-              // The `data` parameter refers to the data for the cell (defined by the
-              // `data` option, which defaults to the column being worked with, in
-              // this case `data: 0`.
-              render: function (data, type, row) {
-                if (data == -1)
-                  return '';
-                return data;
-              },
-              targets: [9, 10, 11, 12, 13],
-          },          
-          {
-            render: function ( data, type, row ) {
-                return data + '%';
-            },
-            targets: [5, 6]
-          },
-          {
-            render: function (data, type, row) {
-               return '';
-              },
-              targets: [0]
-          },
-        ],
+          rowGroup: rowGroup,
+        columnDefs: columnDefs,
         'rowCallback': function(row, data, index){
-            (data['license'] == 'Y')  ? $(row).find('td:eq(2)').css({'background-color': 'green', 'color': 'white', 'text-align': 'center'}).css : $(row).find('td:eq(2)').css({'background-color': 'red', 'color': 'white', 'text-align': 'center'}); 
-            (data['readme'] == 'Y') ? $(row).find('td:eq(3)').css({'background-color': 'green', 'color': 'white', 'text-align': 'center'}) : $(row).find('td:eq(3)').css({'background-color': 'red', 'color': 'white', 'text-align': 'center'});
-            (data['swagger'] == 'Y') ? $(row).find('td:eq(4)').css({'background-color': 'green', 'color': 'white', 'text-align': 'center'}) : $(row).find('td:eq(4)').css({'background-color': 'red', 'color': 'white', 'text-align': 'center'});  
-            if (data['git_trigger'] != '')
-               (data['git_trigger'].includes('Started by user')) ? $(row).find('td:eq(8)').css({'background-color': 'red', 'color': 'white', 'text-align': 'center'}) : $(row).find('td:eq(8)').css({'background-color': 'green', 'color': 'white', 'text-align': 'center'});   
 
-            lineschanged = data['lineschanged'];
-            $(row).find('td:eq(5)').css('color', 'white');
+            if (frequency.length == 0 && lag.length == 0)
+            {
+              ((data.license ?? '') == 'Y')  ? $(row).find('td:eq(2)').css({'background-color': 'green', 'color': 'white', 'text-align': 'center'}).css : $(row).find('td:eq(2)').css({'background-color': 'red', 'color': 'white', 'text-align': 'center'}); 
+              ((data.readme ?? '') == 'Y') ? $(row).find('td:eq(3)').css({'background-color': 'green', 'color': 'white', 'text-align': 'center'}) : $(row).find('td:eq(3)').css({'background-color': 'red', 'color': 'white', 'text-align': 'center'});
+              ((data.swagger ?? '') == 'Y') ? $(row).find('td:eq(4)').css({'background-color': 'green', 'color': 'white', 'text-align': 'center'}) : $(row).find('td:eq(4)').css({'background-color': 'red', 'color': 'white', 'text-align': 'center'});  
+              if ((data.git_trigger ?? '') != '')
+                (data.git_trigger.includes('Started by user')) ? $(row).find('td:eq(8)').css({'background-color': 'red', 'color': 'white', 'text-align': 'center'}) : $(row).find('td:eq(8)').css({'background-color': 'green', 'color': 'white', 'text-align': 'center'});   
+            }
 
-            if (lineschanged <= 20)  
+            lines_changed = data.lines_changed ?? '';
+            if (lines_changed != '') 
+              $(row).find('td:eq(5)').css('color', 'white');
+
+            if (lines_changed == '') 
+              ()=>{}
+            else if (lines_changed <= 20)  
               $(row).find('td:eq(5)').css('background-color', 'green') 
-            else if (lineschanged <= 50) 
+            else if (lines_changed <= 50) 
               $(row).find('td:eq(5)').css('background-color', 'orange');    
             else
               $(row).find('td:eq(5)').css('background-color', 'red');      
               
-            committers = data['committers'];
-            $(row).find('td:eq(6)').css('color', 'white');
+            contributing_committers = data.contributing_committers ?? '';
+            if (contributing_committers != '') 
+              $(row).find('td:eq(6)').css('color', 'white');
 
-            if (committers >= 80)  
+            if (contributing_committers == '')
+              ()=>{}
+            else if (contributing_committers >= 80)  
               $(row).find('td:eq(6)').css('background-color', 'green') 
-            else if (committers >= 50) 
+            else if (contributing_committers >= 50) 
               $(row).find('td:eq(6)').css('background-color', 'orange');    
-            else
+            else 
               $(row).find('td:eq(6)').css('background-color', 'red');  
 
-            sonar_bugs = data['sonar_bugs'];
-            $(row).find('td:eq(8)').css('color', 'white');
+            sonar_bugs = data.sonar_bugs ?? -1;
+            if (sonar_bugs != -1) 
+              $(row).find('td:eq(8)').css('color', 'white');
 
             if (sonar_bugs == -1)  
               ()=>{}
@@ -147,8 +202,9 @@ function toTitleCase(str) {
             else
               $(row).find('td:eq(9)').css('background-color', 'red');  
 
-            sonar_code_smells = data['sonar_code_smells'];
-            $(row).find('td:eq(10)').css('color', 'white');
+            sonar_code_smells = data.sonar_code_smells ?? -1;
+            if (sonar_code_smells != -1)
+              $(row).find('td:eq(10)').css('color', 'white');
 
             if (sonar_code_smells == -1)  
               ()=>{} 
@@ -159,8 +215,9 @@ function toTitleCase(str) {
             else
               $(row).find('td:eq(10)').css('background-color', 'red');  
 
-            sonar_violations = data['sonar_violations'];
-            $(row).find('td:eq(11)').css('color', 'white');
+            sonar_violations = data.sonar_violations ?? -1;
+            if (sonar_violations != -1) 
+              $(row).find('td:eq(11)').css('color', 'white');
 
             if (sonar_violations == -1)  
               ()=>{}
@@ -171,20 +228,22 @@ function toTitleCase(str) {
             else
               $(row).find('td:eq(11)').css('background-color', 'red');  
 
-            sonar_project_status = data['sonar_project_status'];
-            $(row).find('td:eq(12)').css('color', 'white');
+            sonar_project_status = data.sonar_project_status ?? '';
+            if (sonar_project_status != '')
+              $(row).find('td:eq(12)').css('color', 'white');
 
-            if (sonar_project_status == 'NONE')  
+            if (sonar_project_status == '')
+              ()=>{}
+            else if (sonar_project_status == 'NONE')  
               $(row).find('td:eq(12)').css('background-color', 'red') 
             else if (sonar_project_status == 'OK')  
               $(row).find('td:eq(12)').css('background-color', 'green') 
             else if (sonar_project_status == 'WARN') 
               $(row).find('td:eq(12)').css('background-color', 'orange');    
-            else
-              ()=>{}  
 
-            vericode_score = data['vericode_score'];
-            $(row).find('td:eq(13)').css('color', 'white');
+            vericode_score = data.vericode_score ?? -1;
+            if (vericode_score != -1) 
+              $(row).find('td:eq(13)').css('color', 'white');
 
             if (vericode_score == -1)  
               ()=>{}
@@ -202,7 +261,7 @@ function toTitleCase(str) {
     </script>
 </head>
 <body class='default'>
-     <div style="text-align:center;"><H2 id="report_title" style="color:black;">Compliance Scorecard</H2></div>
+     <div style="text-align:center;"><H2 id="report_title" style="color:white;"></H2></div>
      <div id="dataTable"></div>
        <div style='margin-top: 120px;'>
         <div style='float: left;'>
