@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM quay.io/ortelius/ms-python-base:fastapi-1.1 as base
+FROM tiangolo/uvicorn-gunicorn-fastapi:python3.11
 
 ENV DB_HOST localhost
 ENV DB_NAME postgres
@@ -25,13 +25,8 @@ WORKDIR /app
 COPY main.py /app
 COPY requirements.txt /app
 COPY reports /app/reports
-# ADD repositories.txt /etc/apk/repositories
 
-RUN apk update; \
-    apk add --upgrade apk-tools; \
-    apk upgrade --available; \
-    apk add "expat>=2.4.5" python3 python3-dev gcc g++ gfortran musl-dev
-
-RUN python -m pip install --upgrade pip; \
+RUN apt-get update; \
+    python -m pip install --upgrade pip; \
     pip install -r requirements.txt; \
     python -m pip uninstall -y pip;
