@@ -25,11 +25,12 @@ WORKDIR /app
 COPY main.py /app
 COPY requirements.txt /app
 COPY reports /app/reports
+# ADD repositories.txt /etc/apk/repositories
 
 RUN apk update; \
     apk add --upgrade apk-tools; \
     apk upgrade --available; \
-    apk add "expat>=2.4.5"
+    apk add "expat>=2.4.5" python3 python3-dev gcc g++ gfortran musl-dev
 
 RUN python -m pip install --upgrade pip; \
     pip install -r requirements.txt; \
