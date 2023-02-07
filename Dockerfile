@@ -11,8 +11,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+FROM python:3.10-slim AS build-env
 
-FROM tiangolo/uvicorn-gunicorn-fastapi:python3.11
+### Install pipenv and compilation dependencies
+RUN apt-get update; \
+    apt-get install -y --no-install-recommends gcc libbz2-dev;
+
+COPY . /app
+WORKDIR /app
+
+RUN pip install --upgrade pip; \
+    pip install --no-cache-dir --upgrade -r requirements.txt; \
+    pip uninstall -y pip wheel setuptools; \
+    cp $(which uvicorn) /app
+
+# Runtime
+FROM al3xos/python-distroless:3.10-debian11
 
 ENV DB_HOST localhost
 ENV DB_NAME postgres
@@ -20,13 +34,13 @@ ENV DB_USER postgres
 ENV DB_PASS postgres
 ENV DB_PORT 5432
 
+COPY --from=build-env /app /app
+COPY --from=build-env /usr/local/lib/python3.10/site-packages /usr/local/lib/python3.10/site-packages
+COPY --from=build-env /usr/lib/x86_64-linux-gnu/libsqlite3* /usr/lib/x86_64-linux-gnu
+COPY --from=build-env /lib/x86_64-linux-gnu/libbz2* /lib/x86_64-linux-gnu
+ENV PYTHONPATH=/usr/local/lib/python3.10/site-packages
+
 WORKDIR /app
 
-COPY main.py /app
-COPY requirements.txt /app
-COPY reports /app/reports
-
-RUN apt-get update; \
-    python -m pip install --upgrade pip; \
-    pip install -r requirements.txt; \
-    python -m pip uninstall -y pip;
+EXPOSE 80
+ENTRYPOINT ["./uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]

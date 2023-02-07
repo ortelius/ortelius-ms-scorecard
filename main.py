@@ -17,6 +17,7 @@ import logging
 import os
 import re
 import socket
+import sys
 from pprint import pprint
 from time import sleep
 from typing import Optional, Union
@@ -36,7 +37,7 @@ def formatDiff(diff):
     duration = str(diff.to_pytimedelta())
     if ('.' in duration):
         duration = duration.split('.')[0]
-    
+
     if (duration == '0:00:00'):
         return '1st deployment'
 
@@ -100,27 +101,8 @@ class StatusMsg(BaseModel):
     service_name: Optional[str] = None
 
 
-@app.get("/health",
-         responses={
-             503: {"model": StatusMsg,
-                   "description": "DOWN Status for the Service",
-                   "content": {
-                       "application/json": {
-                           "example": {"status": 'DOWN'}
-                       },
-                   },
-                   },
-             200: {"model": StatusMsg,
-                   "description": "UP Status for the Service",
-                   "content": {
-                       "application/json": {
-                           "example": {"status": 'UP', "service_name": service_name}
-                       }
-                   },
-                   },
-         }
-         )
-async def health(response: Response):
+@app.get("/health")
+async def health(response: Response) -> StatusMsg:
     try:
         with engine.connect() as connection:
             conn = connection.connection
@@ -141,38 +123,9 @@ class ScoreCard(BaseModel):
     domain: str = ""
     columns: list = None
     data: list = None
-class Message(BaseModel):
-    detail: str
 
-@app.get('/msapi/scorecard',
-         responses={
-             401: {"model": Message,
-                   "description": "Authorization Status",
-                   "content": {
-                       "application/json": {
-                           "example": {"detail": "Authorization failed"}
-                       },
-                   },
-                   },
-             500: {"model": Message,
-                   "description": "SQL Error",
-                   "content": {
-                       "application/json": {
-                           "example": {"detail": "SQL Error: 30x"}
-                       },
-                   },
-                   },
-             200: {
-                 "model": ScoreCard,
-                 "description": "Component Paackage Dependencies"},
-             "content": {
-                 "application/json": {
-                     "example": {"data": [{"packagename": "Flask", "packageversion": "1.2.2", "name": "BSD-3-Clause", "url": "https://spdx.org/licenses/BSD-3-Clause.html", "summary": ""}]}
-                 }
-             }
-         }
-         )
-async def getScoreCard(request: Request, domain: Union[str, None] = None, frequency: Union[str, None] = None, env: Union[str, None] = None, lag: Union[str, None] = None, testit: Union[str, None] = None):
+@app.get('/msapi/scorecard')
+async def getScoreCard(request: Request, domain: Union[str, None] = None, frequency: Union[str, None] = None, env: Union[str, None] = None, lag: Union[str, None] = None, testit: Union[str, None] = None) -> ScoreCard:
 
     response_data = []
     domname = ""
@@ -197,7 +150,7 @@ async def getScoreCard(request: Request, domain: Union[str, None] = None, freque
 
                     if (frequency is not None):
                         data = ScoreCard()
-                        
+
                         # Read data from PostgreSQL database table and load into a DataFrame instance
                         sql = "select application, environment, (weekly::date)::varchar as week, count(weekly) as frequency from dm.dm_app_scorecard " \
                               "group by application, environment, week " \
@@ -214,14 +167,14 @@ async def getScoreCard(request: Request, domain: Union[str, None] = None, freque
                             sql = "select application, environment, (weekly::date)::varchar as week, count(weekly) as frequency from dm.dm_app_scorecard " \
                                   "where domainid in (WITH RECURSIVE rec (id) as ( SELECT a.id from dm.dm_domain a where id=" + str(domain) + " UNION ALL SELECT b.id from rec, dm.dm_domain b where b.domainid = rec.id ) SELECT * FROM rec) " \
                                   "group by application, environment, week " \
-                                  "order by application, environment, week desc"                            
+                                  "order by application, environment, week desc"
 
                         df = pd.read_sql(sql, connection)
 
                         table = df.pivot_table('frequency',['application', 'environment', 'week'], 'environment')
                         table = table.fillna('')
                         cols = list(table.columns)
-                        
+
                         newcols = []
                         for env in envorder:
                             if (env in cols):
@@ -236,7 +189,7 @@ async def getScoreCard(request: Request, domain: Union[str, None] = None, freque
                         for col in cols:
                             column = {"name": col, "data": col}
                             data.columns.append(column)
-                            
+
                         rows = []
                         # using a itertuples()
                         for i in table.itertuples():
@@ -270,7 +223,7 @@ async def getScoreCard(request: Request, domain: Union[str, None] = None, freque
 
                             sql = "select application, environment, deploymentid, startts as datetime from dm.dm_app_lag " \
                                   "where domainid in (WITH RECURSIVE rec (id) as ( SELECT a.id from dm.dm_domain a where id=" + str(domain) + " UNION ALL SELECT b.id from rec, dm.dm_domain b where b.domainid = rec.id ) SELECT * FROM rec) " \
-                                  "order by application, environment, deploymentid"                    
+                                  "order by application, environment, deploymentid"
 
                         df = pd.read_sql(sql, connection)
                         table=df.sort_values(by = ['application', 'environment', 'deploymentid'], ascending = [True, True, True]).groupby(['application', 'environment']).head(2)
@@ -328,7 +281,7 @@ async def getScoreCard(request: Request, domain: Union[str, None] = None, freque
                         sql = "select distinct a.id as appid, b.name as environment from dm_application a, dm_environment b, dm_deployment c where a.id = c.appid and c.envid = b.id order by 1, 2"
 
                         df = pd.read_sql(sql, connection)
-                        envtable = df.pivot(index='appid',columns='environment',values='environment') 
+                        envtable = df.pivot(index='appid',columns='environment',values='environment')
 
                         cols = list(envtable.columns)
                         newcols = []
@@ -338,7 +291,7 @@ async def getScoreCard(request: Request, domain: Union[str, None] = None, freque
                         missingcols = list(set(cols).difference(set(newcols)))
                         newcols.extend(missingcols)
                         envtable = envtable.reindex(columns=newcols)
-                        
+
                         cols = []
                         for col in list(envtable.columns):
                             cols.append('Environment_' + col)
@@ -404,13 +357,13 @@ async def getScoreCard(request: Request, domain: Union[str, None] = None, freque
                             apptable.insert(1, 'Git_Lines_Added', 0)
 
                         if 'Git_Lines_Deleted' not in apptable.columns:
-                            apptable.insert(1, 'Git_Lines_Deleted', 0) 
+                            apptable.insert(1, 'Git_Lines_Deleted', 0)
 
                         if 'Git_Lines_Total' not in apptable.columns:
-                            apptable.insert(1, 'Git_Lines_Total', 0) 
+                            apptable.insert(1, 'Git_Lines_Total', 0)
 
                         if 'Lines_Changed' not in apptable.columns:
-                            apptable.insert(1, 'Lines_Changed', 0) 
+                            apptable.insert(1, 'Lines_Changed', 0)
 
                         apptable['Git_Lines_Added'] = pd.to_numeric(apptable['Git_Lines_Added'], errors='coerce').fillna(0).astype('int')
                         apptable['Git_Lines_Deleted'] = pd.to_numeric(apptable['Git_Lines_Deleted'], errors='coerce').fillna(0).astype('int')
@@ -433,15 +386,15 @@ async def getScoreCard(request: Request, domain: Union[str, None] = None, freque
                         apptable.set_index(['appid', 'compid'])
 
                         newcols = ["appid",
-                                "compid", 
-                                "domainid", 
-                                "application", 
-                                "component", 
-                                "license", 
-                                "readme", 
-                                "swagger", 
-                                "Lines_Changed", 
-                                "Contributing_Committers", 
+                                "compid",
+                                "domainid",
+                                "application",
+                                "component",
+                                "license",
+                                "readme",
+                                "swagger",
+                                "Lines_Changed",
+                                "Contributing_Committers",
                                 "Git_Total_Committers_Cnt",
                                 "Job_Triggered_By",
                                 "Sonar_Bugs",
@@ -449,7 +402,7 @@ async def getScoreCard(request: Request, domain: Union[str, None] = None, freque
                                 "Sonar_Violations",
                                 "Sonar_Project_Status",
                                 "Vericode_Score"]
-                        
+
                     #    set_dif = set(list(apptable.columns)).symmetric_difference(set(newcols))
                     #    temp3 = list(set_dif)
                     #    print(temp3)
@@ -497,13 +450,13 @@ async def getScoreCard(request: Request, domain: Union[str, None] = None, freque
                             ex, sleep_for, attempt, no_of_retry
                         )
                     )
-                    #200ms of sleep time in cons. retry calls 
-                    sleep(sleep_for) 
+                    #200ms of sleep time in cons. retry calls
+                    sleep(sleep_for)
                     attempt += 1
                     continue
                 else:
                     raise
-        
+
     except HTTPException:
         raise
     except Exception as err:
