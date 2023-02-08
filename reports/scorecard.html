@@ -16,16 +16,16 @@
 -->
 <html lang="en">
 <head>
-    <title id="Description">Compliance</title>  
+    <title id="Description">Compliance</title>
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/ju/jqc-1.12.4/dt-1.12.1/rg-1.2.0/datatables.min.css"/>
     <link rel="stylesheet" type="text/css" href="https://console.deployhub.com/dmadminweb/css/devops_frydesign.css"/>
 
-    <script type="text/javascript" src="https://cdn.datatables.net/v/ju/jqc-1.12.4/dt-1.12.1/rg-1.2.0/datatables.min.js"></script>    
+    <script type="text/javascript" src="https://cdn.datatables.net/v/ju/jqc-1.12.4/dt-1.12.1/rg-1.2.0/datatables.min.js"></script>
     <script type="text/javascript">
-    
+
     function getParameterByName( name ) {
      console.log(name);
-     var regexS = "[\\?&]"+name+"=([^&#]*)", 
+     var regexS = "[\\?&]"+name+"=([^&#]*)",
      regex = new RegExp( regexS ),
      results = regex.exec( window.location.search );
      if( results == null ){
@@ -38,13 +38,13 @@
 function toTitleCase(str) {
   str = str.toLowerCase().split('_');
   for (var i = 0; i < str.length; i++) {
-    str[i] = str[i].charAt(0).toUpperCase() + str[i].slice(1); 
+    str[i] = str[i].charAt(0).toUpperCase() + str[i].slice(1);
   }
   return str.join(' ');
 }
-      		
-  $(document).ready(function () 
-  {  
+
+  $(document).ready(function ()
+  {
     var url = "/msapi/scorecard";
 
     var domain = getParameterByName("domain");
@@ -62,21 +62,21 @@ function toTitleCase(str) {
        url = url + "&lag=" + lag;
      else
        url = "/msapi/scorecard?lag=" + lag;
-    }  
+    }
     else if (frequency.length > 0)
     {
      if (url.includes('?'))
        url = url + "&frequency=" + frequency;
      else
        url = "/msapi/scorecard?frequency=" + frequency;
-     
+
        columnDefs = [
         {
           targets: 1,
           className: 'dt-body-nowrap'
         }
        ]
-    }   
+    }
     else
     {
       columnDefs = [
@@ -90,12 +90,12 @@ function toTitleCase(str) {
                 return data;
               },
               targets: [9, 10, 11, 12, 13],
-          },          
+          },
           {
             render: function ( data, type, row ) {
               if (data != '')
                 return data + '%';
-              else 
+              else
                 return '';
             },
             targets: [5, 6]
@@ -111,7 +111,7 @@ function toTitleCase(str) {
 
     $.getJSON(url,
         function(data) {
- 
+
         domain = data.domain;
 
         rowGroup = {dataSrc: [ 'application'] };
@@ -124,11 +124,11 @@ function toTitleCase(str) {
         else if (lag.length > 0)
         {
           $('#report_title').html("Lag Between The Current Deployment And Previous One Per Environment");
-          rowGroup = null;          
+          rowGroup = null;
         }
-        else 
+        else
           $("#report_title").html("Compliance Scorecard for " + domain);
-        
+
         cols = data.columns;
 
         for (i=0; i<cols.length;i++)
@@ -149,7 +149,7 @@ function toTitleCase(str) {
           sDom: 't<"bottom"lip>',
           columns: cols,
           data: data.data,
-          order: [[1, 'desc'], [2, 'desc']],               
+          order: [[1, 'desc'], [2, 'desc']],
           rowGroup: rowGroup,
         columnDefs: columnDefs,
     });
@@ -170,7 +170,7 @@ function toTitleCase(str) {
         </thead>
         <tbody>
         </tbody>
-        </table>         
+        </table>
         </div>
     </div>
 </body>

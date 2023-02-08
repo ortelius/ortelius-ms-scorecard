@@ -1,14 +1,14 @@
 # ortelius-ms-scorecard
 Dependency Package Data Microservice - Read
 
-This is a flask web application which returns a list of objects known as Component Dependencies when the 
-endpoint `/msapi/deppkg` is accessed. 
+This is a flask web application which returns a list of objects known as Component Dependencies when the
+endpoint `/msapi/deppkg` is accessed.
 
 # Setup
 - Clone the repository on your local computer
 
 ### Start Postgres
-The project requires a Postgres server to be running. This can be done by either installing Postgres directly on 
+The project requires a Postgres server to be running. This can be done by either installing Postgres directly on
 your machine and making available the following environmental variables for your python application:
 
 | Environmental Variable | Description |
@@ -19,8 +19,8 @@ your machine and making available the following environmental variables for your
 | DB_PASSWORD | The password to the database attached to the provided above user |
 | DB_PORT | The port that the postgres server run on. Usually 5432. |
 
-You can make these environmental variables by creating a `.env` file (will be ignored by git) in the 
-project root and filling with the required environmental variables like as shown below (these are 
+You can make these environmental variables by creating a `.env` file (will be ignored by git) in the
+project root and filling with the required environmental variables like as shown below (these are
 injected into the docker container at runtime):
 
 ```text
@@ -37,16 +37,16 @@ The flask application has been dockerized and can be utilized by following the s
   ```shell
   docker build -t comp-dep .
   ```
-- Run the docker on local machine by executing the following command 
+- Run the docker on local machine by executing the following command
   ```shell
   docker run -p 5000:5000 --env-file .env -d comp-dep
   ```
-- You should be able to access the webpage at [localhost:5000](http://www.localhost:5000/) and the list of 
+- You should be able to access the webpage at [localhost:5000](http://www.localhost:5000/) and the list of
 component dependencies in json at [http://localhost:5000/msapi/deppkg](http://localhost:5000/msapi/deppkg)
 
 ------------------------------------------
 
-Another option is to make use of [Docker compose](https://docs.docker.com/compose/) to start up the project 
+Another option is to make use of [Docker compose](https://docs.docker.com/compose/) to start up the project
 at once. You can simply run:
 
 ```shell
