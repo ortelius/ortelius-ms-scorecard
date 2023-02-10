@@ -466,7 +466,6 @@ async def getScoreCard(request: Request, domain: Union[str, None] = None, freque
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=5010)
 
-
 # Frequecy per week per env
 # Time lag per env
 # Lines changed between deploy per env ??
