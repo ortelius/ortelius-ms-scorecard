@@ -15,7 +15,7 @@ FROM python:3.10-slim AS python-base
 
 ### Install pipenv and compilation dependencies
 RUN apt-get update; \
-    apt-get install -y --no-install-recommends gcc libbz2-dev;
+    apt-get install -y --no-install-recommends libbz2-dev;
 
 COPY . /app
 WORKDIR /app
@@ -28,7 +28,7 @@ RUN pip install --upgrade pip; \
 ## ------------------------------- distroless base image ------------------------------ ##
 
 # build from distroless C or cc:debug, because lots of Python depends on C
-FROM gcr.io/distroless/cc
+FROM gcr.io/distroless/cc:latest
 
 ARG CHIPSET_ARCH=x86_64-linux-gnu
 
