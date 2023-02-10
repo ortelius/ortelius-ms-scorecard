@@ -80,9 +80,6 @@ ENV DB_USER postgres
 ENV DB_PASS postgres
 ENV DB_PORT 5432
 
-COPY --from=builder /app /app
-COPY --from=builder /home/nonroot/.local /home/nonroot/.local
-
 WORKDIR /app
 
 EXPOSE 80
