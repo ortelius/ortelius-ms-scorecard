@@ -18,7 +18,7 @@ RUN apt-get update; \
     apt-get install -y --no-install-recommends libbz2-dev;
 
 COPY . /app
-WORKDIR /app
+RUN cd /app && pip install -r requirements.txt
 
 RUN pip install --upgrade pip; \
     pip install --no-cache-dir --upgrade -r requirements.txt; \
@@ -80,13 +80,12 @@ ENV DB_USER postgres
 ENV DB_PASS postgres
 ENV DB_PORT 5432
 
-COPY --from=python-base /app /app
-COPY --from=python-base /usr/local/lib/python3.10/site-packages /usr/local/lib/python3.10/site-packages
-COPY --from=python-base /usr/lib/x86_64-linux-gnu/libsqlite3* /usr/lib/x86_64-linux-gnu
-COPY --from=python-base /lib/x86_64-linux-gnu/libbz2* /lib/x86_64-linux-gnu
-ENV PYTHONPATH=/usr/local/lib/python3.10/site-packages
+COPY --from=builder /app /app
+COPY --from=builder /home/nonroot/.local /home/nonroot/.local
 
 WORKDIR /app
 
 EXPOSE 80
-ENTRYPOINT ["./uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
+ENV PATH=$PATH:/home/nonroot/.local/bin
+
+ENTRYPOINT ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
