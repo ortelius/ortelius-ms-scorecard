@@ -15,12 +15,13 @@ FROM python:3.10-slim AS python-base
 
 ### Install pipenv and compilation dependencies
 RUN apt-get update; \
-    apt-get install -y --no-install-recommends libbz2-dev;
+    apt-get install -y --no-install-recommends libbz2-dev; \
+    find / -name "libsqlite3*"
 
 COPY . /app
-RUN cd /app && pip install -r requirements.txt
 
-RUN pip install --upgrade pip; \
+RUN cd /app; \
+    pip install --upgrade pip; \
     pip install --no-cache-dir --upgrade -r requirements.txt; \
     pip uninstall -y pip wheel setuptools; \
     cp $(which uvicorn) /app
@@ -35,9 +36,12 @@ ARG CHIPSET_ARCH=x86_64-linux-gnu
 ## ------------------------- copy python itself from builder -------------------------- ##
 
 # this carries more risk than installing it fully, but makes the image a lot smaller
+
 COPY --from=python-base /usr/local/lib/ /usr/local/lib/
 COPY --from=python-base /usr/local/bin/python /usr/local/bin/python
 COPY --from=python-base /etc/ld.so.cache /etc/ld.so.cache
+COPY --from=python-base /lib/x86_64-linux-gnu/libbz2* /lib/x86_64-linux-gnu
+COPY --from=python-base /usr/lib/x86_64-linux-gnu/libsqlite3* /usr/lib/x86_64-linux-gnu
 
 ## -------------------------- add common compiled libraries --------------------------- ##
 
@@ -51,6 +55,7 @@ COPY --from=python-base /lib/${CHIPSET_ARCH}/libexpat* /lib/${CHIPSET_ARCH}/
 
 ## -------------------------------- non-root user setup ------------------------------- ##
 
+COPY --from=python-base /app /app
 COPY --from=python-base /bin/echo /bin/echo
 COPY --from=python-base /bin/rm /bin/rm
 COPY --from=python-base /bin/sh /bin/sh
@@ -84,4 +89,4 @@ WORKDIR /app
 
 EXPOSE 80
 
-ENTRYPOINT ["./uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
+ENTRYPOINT ["/app/uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
