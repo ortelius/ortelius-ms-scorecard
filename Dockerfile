@@ -30,6 +30,6 @@ ENV DB_USER postgres
 ENV DB_PASS postgres
 ENV DB_PORT 5432
 
-EXPOSE 80
+EXPOSE 8080
 
-ENTRYPOINT ["/app/uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
+ENTRYPOINT ["/app/uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
