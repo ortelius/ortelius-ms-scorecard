@@ -2,5 +2,5 @@ description: Dependency Packages
 icon: https://ortelius.github.io/ortelius-charts/logo.png
 name: ms-scorecard
 type: application
-version: 10.0.68
-appVersion: 10.0.68
+version: 10.0.69
+appVersion: 10.0.69
