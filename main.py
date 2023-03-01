@@ -29,7 +29,7 @@ import uvicorn
 from fastapi import FastAPI, HTTPException, Request, Response, status
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-from sqlalchemy import create_engine
+from sqlalchemy import sql, create_engine
 from sqlalchemy.exc import InterfaceError, OperationalError
 
 
@@ -152,7 +152,7 @@ async def getScoreCard(request: Request, domain: Union[str, None] = None, freque
                         data = ScoreCard()
 
                         # Read data from PostgreSQL database table and load into a DataFrame instance
-                        sql = "select application, environment, (weekly::date)::varchar as week, count(weekly) as frequency from dm.dm_app_scorecard " \
+                        sqlstmt = "select application, environment, (weekly::date)::varchar as week, count(weekly) as frequency from dm.dm_app_scorecard " \
                               "group by application, environment, week " \
                               "order by application, environment, week desc"
 
@@ -164,12 +164,12 @@ async def getScoreCard(request: Request, domain: Union[str, None] = None, freque
                                 domname = row[0]
                             cursor2.close()
 
-                            sql = "select application, environment, (weekly::date)::varchar as week, count(weekly) as frequency from dm.dm_app_scorecard " \
+                            sqlstmt = "select application, environment, (weekly::date)::varchar as week, count(weekly) as frequency from dm.dm_app_scorecard " \
                                   "where domainid in (WITH RECURSIVE rec (id) as ( SELECT a.id from dm.dm_domain a where id=" + str(domain) + " UNION ALL SELECT b.id from rec, dm.dm_domain b where b.domainid = rec.id ) SELECT * FROM rec) " \
                                   "group by application, environment, week " \
                                   "order by application, environment, week desc"
 
-                        df = pd.read_sql(sql, connection)
+                        df = pd.read_sql(sql.text(sqlstmt), connection)
 
                         table = df.pivot_table('frequency',['application', 'environment', 'week'], 'environment')
                         table = table.fillna('')
@@ -210,7 +210,7 @@ async def getScoreCard(request: Request, domain: Union[str, None] = None, freque
                     elif (lag is not None):
                         data = ScoreCard()
                         # Read data from PostgreSQL database table and load into a DataFrame instance
-                        sql = "select application, environment, deploymentid, startts as datetime from dm.dm_app_lag " \
+                        sqlstmt = "select application, environment, deploymentid, startts as datetime from dm.dm_app_lag " \
                               "order by application, environment, deploymentid"
 
                         if (domain is not None):
@@ -221,11 +221,11 @@ async def getScoreCard(request: Request, domain: Union[str, None] = None, freque
                                 domname = row[0]
                             cursor2.close()
 
-                            sql = "select application, environment, deploymentid, startts as datetime from dm.dm_app_lag " \
+                            sqlstmt = "select application, environment, deploymentid, startts as datetime from dm.dm_app_lag " \
                                   "where domainid in (WITH RECURSIVE rec (id) as ( SELECT a.id from dm.dm_domain a where id=" + str(domain) + " UNION ALL SELECT b.id from rec, dm.dm_domain b where b.domainid = rec.id ) SELECT * FROM rec) " \
                                   "order by application, environment, deploymentid"
 
-                        df = pd.read_sql(sql, connection)
+                        df = pd.read_sql(sql.text(sqlstmt), connection)
                         table=df.sort_values(by = ['application', 'environment', 'deploymentid'], ascending = [True, True, True]).groupby(['application', 'environment']).head(2)
                         gs = table.sort_values(by = ['application', 'environment', 'deploymentid'], ascending = [True, True, True]).groupby(['application', 'environment'])['datetime']
                         table['diff'] = gs.diff().fillna(pd.Timedelta(seconds=0))
@@ -278,9 +278,9 @@ async def getScoreCard(request: Request, domain: Union[str, None] = None, freque
                     else:
                         data = ScoreCard()
                         # Read data from PostgreSQL database table and load into a DataFrame instance
-                        sql = "select distinct a.id as appid, b.name as environment from dm_application a, dm_environment b, dm_deployment c where a.id = c.appid and c.envid = b.id order by 1, 2"
+                        sqlstmt = "select distinct a.id as appid, b.name as environment from dm_application a, dm_environment b, dm_deployment c where a.id = c.appid and c.envid = b.id order by 1, 2"
 
-                        df = pd.read_sql(sql, connection)
+                        df = pd.read_sql(sql.text(sqlstmt), connection)
                         envtable = df.pivot(index='appid',columns='environment',values='environment')
 
                         cols = list(envtable.columns)
@@ -297,7 +297,7 @@ async def getScoreCard(request: Request, domain: Union[str, None] = None, freque
                             cols.append('Environment_' + col)
                         envtable.columns = cols
 
-                        sql = "select c.domainid, c.id as appid, b.id as compid, c.name as application, b.name as component, a.name as name, a.value as value " \
+                        sqlstmt = "select c.domainid, c.id as appid, b.id as compid, c.name as application, b.name as component, a.name as name, a.value as value " \
                               "from dm.dm_scorecard_nv a, dm.dm_component b, dm.dm_application c, dm.dm_applicationcomponent d " \
                               "where a.id = b.id and b.status = 'N' and c.status = 'N' and a.id = d.compid and c.id = d.appid " \
                               "order by domainid, appid, compid"
@@ -310,13 +310,13 @@ async def getScoreCard(request: Request, domain: Union[str, None] = None, freque
                                 domname = row[0]
                             cursor2.close()
 
-                            sql = "select c.domainid, c.id as appid, b.id as compid, c.name as application, b.name as component, a.name as name, a.value as value " \
+                            sqlstmt = "select c.domainid, c.id as appid, b.id as compid, c.name as application, b.name as component, a.name as name, a.value as value " \
                                 "from dm.dm_scorecard_nv a, dm.dm_component b, dm.dm_application c, dm.dm_applicationcomponent d " \
                                 "where a.id = b.id and b.status = 'N' and c.status = 'N' and a.id = d.compid and c.id = d.appid " \
                                 "and c.domainid in (WITH RECURSIVE rec (id) as ( SELECT a.id from dm.dm_domain a where id=" + str(domain) + " UNION ALL SELECT b.id from rec, dm.dm_domain b where b.domainid = rec.id ) SELECT * FROM rec) " \
                                 "order by domainid, appid, compid"
 
-                        df = pd.read_sql(sql, connection)
+                        df = pd.read_sql(sql.text(sqlstmt), connection)
                         apptable =  df.pivot(index=["appid","compid", "domainid", "application", "component"], columns=['name'], values=['value']).reset_index()
                         apptable.columns = [ '_'.join(re.findall('.[^A-Z]*',re.sub(r'^value_','','_'.join(tup).rstrip('_')))) for tup in apptable.columns.values]
 
