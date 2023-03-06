@@ -8,11 +8,67 @@
           "fullName": "Trivy Vulnerability Scanner",
           "informationUri": "https://github.com/aquasecurity/trivy",
           "name": "Trivy",
-          "rules": [],
+          "rules": [
+            {
+              "id": "CVE-2022-1304",
+              "name": "OsPackageVulnerability",
+              "shortDescription": {
+                "text": "e2fsprogs: out-of-bounds read/write via crafted filesystem"
+              },
+              "fullDescription": {
+                "text": "An out-of-bounds read/write vulnerability was found in e2fsprogs 1.46.5. This issue leads to a segmentation fault and possibly arbitrary code execution via a specially crafted filesystem."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "helpUri": "https://avd.aquasec.com/nvd/cve-2022-1304",
+              "help": {
+                "text": "Vulnerability CVE-2022-1304\nSeverity: HIGH\nPackage: libcom_err\nFixed Version: 1.46.6-r0\nLink: [CVE-2022-1304](https://avd.aquasec.com/nvd/cve-2022-1304)\nAn out-of-bounds read/write vulnerability was found in e2fsprogs 1.46.5. This issue leads to a segmentation fault and possibly arbitrary code execution via a specially crafted filesystem.",
+                "markdown": "**Vulnerability CVE-2022-1304**\n| Severity | Package | Fixed Version | Link |\n| --- | --- | --- | --- |\n|HIGH|libcom_err|1.46.6-r0|[CVE-2022-1304](https://avd.aquasec.com/nvd/cve-2022-1304)|\n\nAn out-of-bounds read/write vulnerability was found in e2fsprogs 1.46.5. This issue leads to a segmentation fault and possibly arbitrary code execution via a specially crafted filesystem."
+              },
+              "properties": {
+                "precision": "very-high",
+                "security-severity": "7.8",
+                "tags": [
+                  "vulnerability",
+                  "security",
+                  "HIGH"
+                ]
+              }
+            }
+          ],
           "version": "0.37.2"
         }
       },
-      "results": [],
+      "results": [
+        {
+          "ruleId": "CVE-2022-1304",
+          "ruleIndex": 0,
+          "level": "error",
+          "message": {
+            "text": "Package: libcom_err\nInstalled Version: 1.46.5-r4\nVulnerability CVE-2022-1304\nSeverity: HIGH\nFixed Version: 1.46.6-r0\nLink: [CVE-2022-1304](https://avd.aquasec.com/nvd/cve-2022-1304)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "ortelius/ms-scorecard",
+                  "uriBaseId": "ROOTPATH"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1,
+                  "endLine": 1,
+                  "endColumn": 1
+                }
+              },
+              "message": {
+                "text": "ortelius/ms-scorecard: libcom_err@1.46.5-r4"
+              }
+            }
+          ]
+        }
+      ],
       "columnKind": "utf16CodeUnits",
       "originalUriBaseIds": {
         "ROOTPATH": {
