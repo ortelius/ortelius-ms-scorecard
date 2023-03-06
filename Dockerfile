@@ -11,13 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-FROM python:3.10-alpine
+FROM python:3.11.0-alpine3.17
 
 WORKDIR /app
 COPY . /app
 
-ENV PYTHONPATH=/usr/lib/python3.10/site-packages
-RUN apk --no-cache add libbz2 py3-numpy py3-pandas;
+ENV PYTHONPATH=/usr/lib/python3.11/site-packages
+RUN apk --no-cache add libbz2;
+RUN apk add py3-numpy py3-pandas --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community;
 
 RUN pip install --upgrade pip; \
     pip install --no-cache-dir -r requirements.txt; \
