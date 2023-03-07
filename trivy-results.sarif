@@ -37,6 +37,33 @@
               }
             },
             {
+              "id": "CVE-2022-4203",
+              "name": "OsPackageVulnerability",
+              "shortDescription": {
+                "text": "openssl: read buffer overflow in X.509 certificate verification"
+              },
+              "fullDescription": {
+                "text": "A read buffer overrun can be triggered in X.509 certificate verification, specifically in name constraint checking. Note that this occurs after certificate chain signature verification and requires either a CA to have signed the malicious certificate or for the application to continue certificate verification despite failure to construct a path to a trusted issuer. The read buffer overrun might result in a crash which could lead to a denial of service attack. In theory it could also result in the disclosure of private memory contents (such as private keys, or sensitive plaintext) although we are not aware of any working exploit leading to memory contents disclosure as of the time of release of this advisory. In a TLS client, this can be triggered by connecting to a malicious server. In a TLS server, this can be triggered if the server requests client authentication and a malicious client connects."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "helpUri": "https://avd.aquasec.com/nvd/cve-2022-4203",
+              "help": {
+                "text": "Vulnerability CVE-2022-4203\nSeverity: CRITICAL\nPackage: libssl3\nFixed Version: 3.0.8-r0\nLink: [CVE-2022-4203](https://avd.aquasec.com/nvd/cve-2022-4203)\nA read buffer overrun can be triggered in X.509 certificate verification, specifically in name constraint checking. Note that this occurs after certificate chain signature verification and requires either a CA to have signed the malicious certificate or for the application to continue certificate verification despite failure to construct a path to a trusted issuer. The read buffer overrun might result in a crash which could lead to a denial of service attack. In theory it could also result in the disclosure of private memory contents (such as private keys, or sensitive plaintext) although we are not aware of any working exploit leading to memory contents disclosure as of the time of release of this advisory. In a TLS client, this can be triggered by connecting to a malicious server. In a TLS server, this can be triggered if the server requests client authentication and a malicious client connects.",
+                "markdown": "**Vulnerability CVE-2022-4203**\n| Severity | Package | Fixed Version | Link |\n| --- | --- | --- | --- |\n|CRITICAL|libssl3|3.0.8-r0|[CVE-2022-4203](https://avd.aquasec.com/nvd/cve-2022-4203)|\n\nA read buffer overrun can be triggered in X.509 certificate verification, specifically in name constraint checking. Note that this occurs after certificate chain signature verification and requires either a CA to have signed the malicious certificate or for the application to continue certificate verification despite failure to construct a path to a trusted issuer. The read buffer overrun might result in a crash which could lead to a denial of service attack. In theory it could also result in the disclosure of private memory contents (such as private keys, or sensitive plaintext) although we are not aware of any working exploit leading to memory contents disclosure as of the time of release of this advisory. In a TLS client, this can be triggered by connecting to a malicious server. In a TLS server, this can be triggered if the server requests client authentication and a malicious client connects."
+              },
+              "properties": {
+                "precision": "very-high",
+                "security-severity": "9.1",
+                "tags": [
+                  "vulnerability",
+                  "security",
+                  "CRITICAL"
+                ]
+              }
+            },
+            {
               "id": "CVE-2022-3996",
               "name": "OsPackageVulnerability",
               "shortDescription": {
@@ -226,33 +253,6 @@
               }
             },
             {
-              "id": "CVE-2022-4203",
-              "name": "OsPackageVulnerability",
-              "shortDescription": {
-                "text": "openssl: read buffer overflow in X.509 certificate verification"
-              },
-              "fullDescription": {
-                "text": "A read buffer overrun can be triggered in X.509 certificate verification, specifically in name constraint checking. Note that this occurs after certificate chain signature verification and requires either a CA to have signed the malicious certificate or for the application to continue certificate verification despite failure to construct a path to a trusted issuer. The read buffer overrun might result in a crash which could lead to a denial of service attack. In theory it could also result in the disclosure of private memory contents (such as private keys, or sensitive plaintext) although we are not aware of any working exploit leading to memory contents disclosure as of the time of release of this advisory. In a TLS client, this can be triggered by connecting to a malicious server. In a TLS server, this can be triggered if the server requests client authentication and a malicious client connects."
-              },
-              "defaultConfiguration": {
-                "level": "warning"
-              },
-              "helpUri": "https://avd.aquasec.com/nvd/cve-2022-4203",
-              "help": {
-                "text": "Vulnerability CVE-2022-4203\nSeverity: MEDIUM\nPackage: libssl3\nFixed Version: 3.0.8-r0\nLink: [CVE-2022-4203](https://avd.aquasec.com/nvd/cve-2022-4203)\nA read buffer overrun can be triggered in X.509 certificate verification, specifically in name constraint checking. Note that this occurs after certificate chain signature verification and requires either a CA to have signed the malicious certificate or for the application to continue certificate verification despite failure to construct a path to a trusted issuer. The read buffer overrun might result in a crash which could lead to a denial of service attack. In theory it could also result in the disclosure of private memory contents (such as private keys, or sensitive plaintext) although we are not aware of any working exploit leading to memory contents disclosure as of the time of release of this advisory. In a TLS client, this can be triggered by connecting to a malicious server. In a TLS server, this can be triggered if the server requests client authentication and a malicious client connects.",
-                "markdown": "**Vulnerability CVE-2022-4203**\n| Severity | Package | Fixed Version | Link |\n| --- | --- | --- | --- |\n|MEDIUM|libssl3|3.0.8-r0|[CVE-2022-4203](https://avd.aquasec.com/nvd/cve-2022-4203)|\n\nA read buffer overrun can be triggered in X.509 certificate verification, specifically in name constraint checking. Note that this occurs after certificate chain signature verification and requires either a CA to have signed the malicious certificate or for the application to continue certificate verification despite failure to construct a path to a trusted issuer. The read buffer overrun might result in a crash which could lead to a denial of service attack. In theory it could also result in the disclosure of private memory contents (such as private keys, or sensitive plaintext) although we are not aware of any working exploit leading to memory contents disclosure as of the time of release of this advisory. In a TLS client, this can be triggered by connecting to a malicious server. In a TLS server, this can be triggered if the server requests client authentication and a malicious client connects."
-              },
-              "properties": {
-                "precision": "very-high",
-                "security-severity": "5.5",
-                "tags": [
-                  "vulnerability",
-                  "security",
-                  "MEDIUM"
-                ]
-              }
-            },
-            {
               "id": "CVE-2022-4304",
               "name": "OsPackageVulnerability",
               "shortDescription": {
@@ -280,7 +280,7 @@
               }
             }
           ],
-          "version": "0.37.2"
+          "version": "0.38.1"
         }
       },
       "results": [
@@ -312,8 +312,35 @@
           ]
         },
         {
-          "ruleId": "CVE-2022-3996",
+          "ruleId": "CVE-2022-4203",
           "ruleIndex": 1,
+          "level": "error",
+          "message": {
+            "text": "Package: libcrypto3\nInstalled Version: 3.0.7-r0\nVulnerability CVE-2022-4203\nSeverity: CRITICAL\nFixed Version: 3.0.8-r0\nLink: [CVE-2022-4203](https://avd.aquasec.com/nvd/cve-2022-4203)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "ortelius/ms-scorecard",
+                  "uriBaseId": "ROOTPATH"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1,
+                  "endLine": 1,
+                  "endColumn": 1
+                }
+              },
+              "message": {
+                "text": "ortelius/ms-scorecard: libcrypto3@3.0.7-r0"
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CVE-2022-3996",
+          "ruleIndex": 2,
           "level": "error",
           "message": {
             "text": "Package: libcrypto3\nInstalled Version: 3.0.7-r0\nVulnerability CVE-2022-3996\nSeverity: HIGH\nFixed Version: 3.0.7-r2\nLink: [CVE-2022-3996](https://avd.aquasec.com/nvd/cve-2022-3996)"
@@ -340,7 +367,7 @@
         },
         {
           "ruleId": "CVE-2022-4450",
-          "ruleIndex": 2,
+          "ruleIndex": 3,
           "level": "error",
           "message": {
             "text": "Package: libcrypto3\nInstalled Version: 3.0.7-r0\nVulnerability CVE-2022-4450\nSeverity: HIGH\nFixed Version: 3.0.8-r0\nLink: [CVE-2022-4450](https://avd.aquasec.com/nvd/cve-2022-4450)"
@@ -367,7 +394,7 @@
         },
         {
           "ruleId": "CVE-2023-0215",
-          "ruleIndex": 3,
+          "ruleIndex": 4,
           "level": "error",
           "message": {
             "text": "Package: libcrypto3\nInstalled Version: 3.0.7-r0\nVulnerability CVE-2023-0215\nSeverity: HIGH\nFixed Version: 3.0.8-r0\nLink: [CVE-2023-0215](https://avd.aquasec.com/nvd/cve-2023-0215)"
@@ -394,7 +421,7 @@
         },
         {
           "ruleId": "CVE-2023-0216",
-          "ruleIndex": 4,
+          "ruleIndex": 5,
           "level": "error",
           "message": {
             "text": "Package: libcrypto3\nInstalled Version: 3.0.7-r0\nVulnerability CVE-2023-0216\nSeverity: HIGH\nFixed Version: 3.0.8-r0\nLink: [CVE-2023-0216](https://avd.aquasec.com/nvd/cve-2023-0216)"
@@ -421,7 +448,7 @@
         },
         {
           "ruleId": "CVE-2023-0217",
-          "ruleIndex": 5,
+          "ruleIndex": 6,
           "level": "error",
           "message": {
             "text": "Package: libcrypto3\nInstalled Version: 3.0.7-r0\nVulnerability CVE-2023-0217\nSeverity: HIGH\nFixed Version: 3.0.8-r0\nLink: [CVE-2023-0217](https://avd.aquasec.com/nvd/cve-2023-0217)"
@@ -448,7 +475,7 @@
         },
         {
           "ruleId": "CVE-2023-0286",
-          "ruleIndex": 6,
+          "ruleIndex": 7,
           "level": "error",
           "message": {
             "text": "Package: libcrypto3\nInstalled Version: 3.0.7-r0\nVulnerability CVE-2023-0286\nSeverity: HIGH\nFixed Version: 3.0.8-r0\nLink: [CVE-2023-0286](https://avd.aquasec.com/nvd/cve-2023-0286)"
@@ -475,37 +502,10 @@
         },
         {
           "ruleId": "CVE-2023-0401",
-          "ruleIndex": 7,
+          "ruleIndex": 8,
           "level": "error",
           "message": {
             "text": "Package: libcrypto3\nInstalled Version: 3.0.7-r0\nVulnerability CVE-2023-0401\nSeverity: HIGH\nFixed Version: 3.0.8-r0\nLink: [CVE-2023-0401](https://avd.aquasec.com/nvd/cve-2023-0401)"
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "ortelius/ms-scorecard",
-                  "uriBaseId": "ROOTPATH"
-                },
-                "region": {
-                  "startLine": 1,
-                  "startColumn": 1,
-                  "endLine": 1,
-                  "endColumn": 1
-                }
-              },
-              "message": {
-                "text": "ortelius/ms-scorecard: libcrypto3@3.0.7-r0"
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "CVE-2022-4203",
-          "ruleIndex": 8,
-          "level": "warning",
-          "message": {
-            "text": "Package: libcrypto3\nInstalled Version: 3.0.7-r0\nVulnerability CVE-2022-4203\nSeverity: MEDIUM\nFixed Version: 3.0.8-r0\nLink: [CVE-2022-4203](https://avd.aquasec.com/nvd/cve-2022-4203)"
           },
           "locations": [
             {
@@ -555,8 +555,35 @@
           ]
         },
         {
-          "ruleId": "CVE-2022-3996",
+          "ruleId": "CVE-2022-4203",
           "ruleIndex": 1,
+          "level": "error",
+          "message": {
+            "text": "Package: libssl3\nInstalled Version: 3.0.7-r0\nVulnerability CVE-2022-4203\nSeverity: CRITICAL\nFixed Version: 3.0.8-r0\nLink: [CVE-2022-4203](https://avd.aquasec.com/nvd/cve-2022-4203)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "ortelius/ms-scorecard",
+                  "uriBaseId": "ROOTPATH"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1,
+                  "endLine": 1,
+                  "endColumn": 1
+                }
+              },
+              "message": {
+                "text": "ortelius/ms-scorecard: libssl3@3.0.7-r0"
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CVE-2022-3996",
+          "ruleIndex": 2,
           "level": "error",
           "message": {
             "text": "Package: libssl3\nInstalled Version: 3.0.7-r0\nVulnerability CVE-2022-3996\nSeverity: HIGH\nFixed Version: 3.0.7-r2\nLink: [CVE-2022-3996](https://avd.aquasec.com/nvd/cve-2022-3996)"
@@ -583,7 +610,7 @@
         },
         {
           "ruleId": "CVE-2022-4450",
-          "ruleIndex": 2,
+          "ruleIndex": 3,
           "level": "error",
           "message": {
             "text": "Package: libssl3\nInstalled Version: 3.0.7-r0\nVulnerability CVE-2022-4450\nSeverity: HIGH\nFixed Version: 3.0.8-r0\nLink: [CVE-2022-4450](https://avd.aquasec.com/nvd/cve-2022-4450)"
@@ -610,7 +637,7 @@
         },
         {
           "ruleId": "CVE-2023-0215",
-          "ruleIndex": 3,
+          "ruleIndex": 4,
           "level": "error",
           "message": {
             "text": "Package: libssl3\nInstalled Version: 3.0.7-r0\nVulnerability CVE-2023-0215\nSeverity: HIGH\nFixed Version: 3.0.8-r0\nLink: [CVE-2023-0215](https://avd.aquasec.com/nvd/cve-2023-0215)"
@@ -637,7 +664,7 @@
         },
         {
           "ruleId": "CVE-2023-0216",
-          "ruleIndex": 4,
+          "ruleIndex": 5,
           "level": "error",
           "message": {
             "text": "Package: libssl3\nInstalled Version: 3.0.7-r0\nVulnerability CVE-2023-0216\nSeverity: HIGH\nFixed Version: 3.0.8-r0\nLink: [CVE-2023-0216](https://avd.aquasec.com/nvd/cve-2023-0216)"
@@ -664,7 +691,7 @@
         },
         {
           "ruleId": "CVE-2023-0217",
-          "ruleIndex": 5,
+          "ruleIndex": 6,
           "level": "error",
           "message": {
             "text": "Package: libssl3\nInstalled Version: 3.0.7-r0\nVulnerability CVE-2023-0217\nSeverity: HIGH\nFixed Version: 3.0.8-r0\nLink: [CVE-2023-0217](https://avd.aquasec.com/nvd/cve-2023-0217)"
@@ -691,7 +718,7 @@
         },
         {
           "ruleId": "CVE-2023-0286",
-          "ruleIndex": 6,
+          "ruleIndex": 7,
           "level": "error",
           "message": {
             "text": "Package: libssl3\nInstalled Version: 3.0.7-r0\nVulnerability CVE-2023-0286\nSeverity: HIGH\nFixed Version: 3.0.8-r0\nLink: [CVE-2023-0286](https://avd.aquasec.com/nvd/cve-2023-0286)"
@@ -718,37 +745,10 @@
         },
         {
           "ruleId": "CVE-2023-0401",
-          "ruleIndex": 7,
+          "ruleIndex": 8,
           "level": "error",
           "message": {
             "text": "Package: libssl3\nInstalled Version: 3.0.7-r0\nVulnerability CVE-2023-0401\nSeverity: HIGH\nFixed Version: 3.0.8-r0\nLink: [CVE-2023-0401](https://avd.aquasec.com/nvd/cve-2023-0401)"
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "ortelius/ms-scorecard",
-                  "uriBaseId": "ROOTPATH"
-                },
-                "region": {
-                  "startLine": 1,
-                  "startColumn": 1,
-                  "endLine": 1,
-                  "endColumn": 1
-                }
-              },
-              "message": {
-                "text": "ortelius/ms-scorecard: libssl3@3.0.7-r0"
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "CVE-2022-4203",
-          "ruleIndex": 8,
-          "level": "warning",
-          "message": {
-            "text": "Package: libssl3\nInstalled Version: 3.0.7-r0\nVulnerability CVE-2022-4203\nSeverity: MEDIUM\nFixed Version: 3.0.8-r0\nLink: [CVE-2022-4203](https://avd.aquasec.com/nvd/cve-2022-4203)"
           },
           "locations": [
             {
