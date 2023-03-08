@@ -18,6 +18,7 @@ COPY . /app
 
 ENV PYTHONPATH=/usr/lib/python3.11/site-packages
 RUN apk --no-cache add libbz2;
+RUN apk upgrade;
 RUN apk add py3-numpy py3-pandas --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community;
 
 RUN pip install --upgrade pip; \
