@@ -1,6 +1,6 @@
 replicaCount: 1
 image:
   repository: quay.io/ortelius/ms-scorecard
-  tag: main-v10.0.84-g48a7c6
-  sha: sha256:b11390edf93b18416fea58251d8d61b3c63984fdafeb54a8490b61033c23f482
+  tag: main-v10.0.85-g4c30f5
+  sha: sha256:dc00a824d10ba83f4e673b19db45a9fc91d34345ee33e0a957430e9be098829c
   pullPolicy: Always
