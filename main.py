@@ -319,7 +319,10 @@ async def get_scorecard(domain: Union[str, None] = None, frequency: Union[str, N
                     else:
                         data = ScoreCard()
                         # Read data from PostgreSQL database table and load into a DataFrame instance
-                        sqlstmt = "select distinct a.id as appid, b.name as environment from dm_application a, dm_environment b, dm_deployment c where a.id = c.appid and c.envid = b.id order by 1, 2"
+                        sqlstmt = """
+                            select distinct a.id as appid, b.name as environment
+                            from dm.dm_application a, dm.dm_environment b, dm.dm_deployment c where a.id = c.appid and c.envid = b.id order by 1, 2
+                        """
 
                         data_frame = pd.read_sql(sql.text(sqlstmt), connection)
                         envtable = data_frame.pivot(index="appid", columns="environment", values="environment")
