@@ -17,13 +17,12 @@ WORKDIR /app
 COPY . /app
 
 ENV PYTHONPATH=/usr/lib/python3.11/site-packages
-RUN apk --no-cache add libbz2;
-RUN apk upgrade;
-RUN apk add py3-numpy py3-pandas --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community;
+RUN apk --no-cache add libbz2=1.0.8-r4; \
+    apk upgrade; \
+    apk --no-cache add py3-numpy=1.24.2-r0 py3-pandas=1.5.3-r0 --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community;
 
-RUN pip install --upgrade pip; \
-    pip install --no-cache-dir -r requirements.txt; \
-    cp $(which uvicorn) /app; \
+RUN pip install --no-cache-dir -r requirements.txt; \
+    cp "$(which uvicorn)" /app; \
     pip uninstall -y pip wheel setuptools
 
 ENV DB_HOST localhost

@@ -15,84 +15,86 @@
  limitations under the License.
 -->
 <html lang="en">
+
 <head>
-    <title id="Description">Compliance</title>
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/ju/jqc-1.12.4/dt-1.12.1/rg-1.2.0/datatables.min.css"/>
-    <link rel="stylesheet" type="text/css" href="https://console.deployhub.com/dmadminweb/css/devops_frydesign.css"/>
+  <title>Compliance</title>
+  <meta name="description" content="Compliance Scorecard" />
+  <meta name="keywords" content="sbom, dora metrics" />
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/ju/jqc-1.12.4/dt-1.12.1/rg-1.2.0/datatables.min.css" />
+  <link rel="stylesheet" type="text/css" href="devops_frydesign.css" />
+</head>
 
-    <script type="text/javascript" src="https://cdn.datatables.net/v/ju/jqc-1.12.4/dt-1.12.1/rg-1.2.0/datatables.min.js"></script>
-    <script type="text/javascript">
+<body class="default">
+  <script type="text/javascript"
+    src="https://cdn.datatables.net/v/ju/jqc-1.12.4/dt-1.12.1/rg-1.2.0/datatables.min.js"></script>
+  <script type="text/javascript">
 
-    function getParameterByName( name ) {
-     console.log(name);
-     var regexS = "[\\?&]"+name+"=([^&#]*)",
-     regex = new RegExp( regexS ),
-     results = regex.exec( window.location.search );
-     if( results == null ){
-       return "";
-     } else{
-       return decodeURIComponent(results[1].replace(/\+/g, " "));
-     }
-   }
-
-function toTitleCase(str) {
-  str = str.toLowerCase().split('_');
-  for (var i = 0; i < str.length; i++) {
-    str[i] = str[i].charAt(0).toUpperCase() + str[i].slice(1);
-  }
-  return str.join(' ');
-}
-
-  $(document).ready(function ()
-  {
-    var url = "/msapi/scorecard";
-
-    var domain = getParameterByName("domain");
-    var frequency = getParameterByName("frequency");
-    var lag = getParameterByName("lag");
-
-    if (domain.length > 0)
-     url = "/msapi/scorecard?domain=" + domain;
-
-    columnDefs = [];
-
-    if (lag.length > 0)
-    {
-     if (url.includes('?'))
-       url = url + "&lag=" + lag;
-     else
-       url = "/msapi/scorecard?lag=" + lag;
+    function getParameterByName(name) {
+      console.log(name);
+      var regexS = "[\\?&]" + name + "=([^&#]*)",
+        regex = new RegExp(regexS),
+        results = regex.exec(window.location.search);
+      if (results == null) {
+        return "";
+      } else {
+        return decodeURIComponent(results[1].replace(/\+/g, " "));
+      }
     }
-    else if (frequency.length > 0)
-    {
-     if (url.includes('?'))
-       url = url + "&frequency=" + frequency;
-     else
-       url = "/msapi/scorecard?frequency=" + frequency;
 
-       columnDefs = [
-        {
-          targets: 1,
-          className: 'dt-body-nowrap'
-        }
-       ]
+    function toTitleCase(str) {
+      str = str.toLowerCase().split('_');
+      for (var i = 0; i < str.length; i++) {
+        str[i] = str[i].charAt(0).toUpperCase() + str[i].slice(1);
+      }
+      return str.join(' ');
     }
-    else
-    {
-      columnDefs = [
+
+    $(document).ready(function () {
+      var url = "/msapi/scorecard";
+
+      var domain = getParameterByName("domain");
+      var frequency = getParameterByName("frequency");
+      var lag = getParameterByName("lag");
+
+      if (domain.length > 0)
+        url = "/msapi/scorecard?domain=" + domain;
+
+      columnDefs = [];
+
+      if (lag.length > 0) {
+        if (url.includes('?'))
+          url = url + "&lag=" + lag;
+        else
+          url = "/msapi/scorecard?lag=" + lag;
+      }
+      else if (frequency.length > 0) {
+        if (url.includes('?'))
+          url = url + "&frequency=" + frequency;
+        else
+          url = "/msapi/scorecard?frequency=" + frequency;
+
+        columnDefs = [
           {
-              // The `data` parameter refers to the data for the cell (defined by the
-              // `data` option, which defaults to the column being worked with, in
-              // this case `data: 0`.
-              render: function (data, type, row) {
-                if (data == -1)
-                  return '';
-                return data;
-              },
-              targets: [9, 10, 11, 12, 13],
+            targets: 1,
+            className: 'dt-body-nowrap'
+          }
+        ]
+      }
+      else {
+        columnDefs = [
+          {
+            // The `data` parameter refers to the data for the cell (defined by the
+            // `data` option, which defaults to the column being worked with, in
+            // this case `data: 0`.
+            render: function (data, type, row) {
+              if (data == -1)
+                return '';
+              return data;
+            },
+            targets: [9, 10, 11, 12, 13],
           },
           {
-            render: function ( data, type, row ) {
+            render: function (data, type, row) {
               if (data != '')
                 return data + '%';
               else
@@ -102,76 +104,76 @@ function toTitleCase(str) {
           },
           {
             render: function (data, type, row) {
-               return '';
-              },
-              targets: [0]
+              return '';
+            },
+            targets: [0]
           },
         ];
-    }
+      }
 
-    $.getJSON(url,
-        function(data) {
+      $.getJSON(url,
+        function (data) {
 
-        domain = data.domain;
+          domain = data.domain;
 
-        rowGroup = {dataSrc: [ 'application'] };
+          rowGroup = { dataSrc: ['application'] };
 
-        if (frequency.length > 0)
-        {
-          $('#report_title').html("Deployment Frequency Per Week Per Environment");
-          rowGroup = null;
-        }
-        else if (lag.length > 0)
-        {
-          $('#report_title').html("Lag Between The Current Deployment And Previous One Per Environment");
-          rowGroup = null;
-        }
-        else
-          $("#report_title").html("Compliance Scorecard for " + domain);
-
-        cols = data.columns;
-
-        for (i=0; i<cols.length;i++)
-        {
-          var name = toTitleCase(cols[i].name);
-          cols[i].name = name
-          if (name == 'Application' || name == "Component" || name == "Domain")
-            $('#reports > thead >tr').append('<th>' + name + '</th>');
+          if (frequency.length > 0) {
+            $('#rpttitle').html("Deployment Frequency Per Week Per Environment");
+            rowGroup = null;
+          }
+          else if (lag.length > 0) {
+            $('#rpttitle').html("Lag Between The Current Deployment And Previous One Per Environment");
+            rowGroup = null;
+          }
           else
-            $('#reports > thead >tr').append('<th class="rotate"><div><div class="textH">' + name + '</div></div></th>');
-        }
+            $("#rpttitle").html("Compliance Scorecard for " + domain);
 
-        $('#reports').DataTable( {
-          lengthMenu: [[15, 25, 50, -1], [15, 25, 50, "All"]],
-          select:  false,
-          ordering: false,
-          pageLength: -1,
-          sDom: 't<"bottom"lip>',
-          columns: cols,
-          data: data.data,
-          order: [[1, 'desc'], [2, 'desc']],
-          rowGroup: rowGroup,
-        columnDefs: columnDefs,
+          cols = data.columns;
+
+          for (i = 0; i < cols.length; i++) {
+            var name = toTitleCase(cols[i].name);
+            cols[i].name = name
+            if (name == 'Application' || name == "Component" || name == "Domain")
+              $('#reports > thead >tr').append('<th>' + name + '</th>');
+            else
+              $('#reports > thead >tr').append('<th class="rotate"><div><div class="textH">' + name + '</div></div></th>');
+          }
+
+          $('#reports').DataTable({
+            lengthMenu: [[15, 25, 50, -1], [15, 25, 50, "All"]],
+            select: false,
+            ordering: false,
+            pageLength: -1,
+            sDom: 't<"bottom"lip>',
+            columns: cols,
+            data: data.data,
+            order: [[1, 'desc'], [2, 'desc']],
+            rowGroup: rowGroup,
+            columnDefs: columnDefs,
+          });
+        });
     });
-  });
-});
+  </script>
 
-    </script>
-</head>
-<body class='default'>
-     <div style="text-align:center;"><H2 id="report_title" style="color:white;"></H2></div>
-     <div id="dataTable"></div>
-       <div style='margin-top: 120px;'>
-        <div style='float: left;'>
-		<table id="reports" class="display" style="width:100%">
+  <div class="center-div">
+    <h2 id="rpttitle" class="fg-white"></h2>
+  </div>
+  <div id="datatable"></div>
+  <div class="top-120">
+    <div class="float-left">
+      {# djlint:off H020 #}
+      <table id="reports" class="display fullwidth">
         <thead>
-            <tr>
-            </tr>
+          <tr>
+          </tr>
         </thead>
         <tbody>
         </tbody>
-        </table>
-        </div>
+      </table>
+      {# djlint:on #}
     </div>
+  </div>
 </body>
+
 </html>
