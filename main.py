@@ -169,8 +169,11 @@ async def get_scorecard(domain: Union[str, None] = None, frequency: Union[str, N
 
                         if domain is not None:
                             domname = ""
+                            params = tuple(
+                                domain,
+                            )
                             cursor2 = conn.cursor()
-                            cursor2.execute("SELECT fulldomain(" + str(domain) + ")")
+                            cursor2.execute("SELECT dm.fulldomain(%s)", parameters=params)
                             if cursor2.rowcount > 0:
                                 row = cursor2.fetchone()
                                 if row:
@@ -238,8 +241,11 @@ async def get_scorecard(domain: Union[str, None] = None, frequency: Union[str, N
 
                         if domain is not None:
                             domname = ""
+                            params = tuple(
+                                domain,
+                            )
                             cursor2 = conn.cursor()
-                            cursor2.execute("SELECT fulldomain(" + str(domain) + ")")
+                            cursor2.execute("SELECT dm.fulldomain(%s)", parameters=params)
                             if cursor2.rowcount > 0:
                                 row = cursor2.fetchone()
                                 if row:
@@ -350,9 +356,11 @@ async def get_scorecard(domain: Union[str, None] = None, frequency: Union[str, N
 
                         if domain is not None:
                             domname = ""
-                            params = (domain,)
+                            params = tuple(
+                                domain,
+                            )
                             cursor2 = conn.cursor()
-                            cursor2.execute("SELECT fulldomain(%s)", params)
+                            cursor2.execute("SELECT dm.fulldomain(%s)", parameters=params)
                             if cursor2.rowcount > 0:
                                 row = cursor2.fetchone()
                                 if row:
