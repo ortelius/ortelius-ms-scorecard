@@ -169,11 +169,9 @@ async def get_scorecard(domain: Union[str, None] = None, frequency: Union[str, N
 
                         if domain is not None:
                             domname = ""
-                            params = tuple(
-                                domain,
-                            )
+                            params = tuple([domain])
                             cursor2 = conn.cursor()
-                            cursor2.execute("SELECT dm.fulldomain(%s)", parameters=params)
+                            cursor2.execute("SELECT dm.fulldomain(%s)", params)
                             if cursor2.rowcount > 0:
                                 row = cursor2.fetchone()
                                 if row:
@@ -241,11 +239,9 @@ async def get_scorecard(domain: Union[str, None] = None, frequency: Union[str, N
 
                         if domain is not None:
                             domname = ""
-                            params = tuple(
-                                domain,
-                            )
+                            params = tuple([domain])
                             cursor2 = conn.cursor()
-                            cursor2.execute("SELECT dm.fulldomain(%s)", parameters=params)
+                            cursor2.execute("SELECT dm.fulldomain(%s)", params)
                             if cursor2.rowcount > 0:
                                 row = cursor2.fetchone()
                                 if row:
@@ -356,11 +352,9 @@ async def get_scorecard(domain: Union[str, None] = None, frequency: Union[str, N
 
                         if domain is not None:
                             domname = ""
-                            params = tuple(
-                                domain,
-                            )
+                            params = tuple([domain])
                             cursor2 = conn.cursor()
-                            cursor2.execute("SELECT dm.fulldomain(%s)", parameters=params)
+                            cursor2.execute("SELECT dm.fulldomain(%s)", params)
                             if cursor2.rowcount > 0:
                                 row = cursor2.fetchone()
                                 if row:
