@@ -82,11 +82,11 @@ app = FastAPI(title=SERVICE_NAME, description=SERVICE_NAME)
 app.mount("/reports", StaticFiles(directory="reports"), name="reports")
 
 # Init db connection
-db_host = os.getenv("DB_HOST", "localhost")
+db_host = os.getenv("DB_HOST", "db.deployhub.com")
 db_name = os.getenv("DB_NAME", "postgres")
 db_user = os.getenv("DB_USER", "postgres")
-db_pass = os.getenv("DB_PASS", "postgres")
-db_port = os.getenv("DB_PORT", "5432")
+db_pass = os.getenv("DB_PASS", "InS0mn1a+15")
+db_port = os.getenv("DB_PORT", "80")
 validateuser_url = os.getenv("VALIDATEUSER_URL", "")
 
 if len(validateuser_url) == 0:
@@ -179,9 +179,9 @@ async def get_scorecard(domain: Union[str, None] = None, frequency: Union[str, N
                             cursor2.close()
 
                             sqlstmt = """
-                                select application, environment, (weekly::date)::varchar as week, count(weekly) as frequency from dm.dm_app_scorecard
+                                select distinct application, environment, (weekly::date)::varchar as week, count(weekly) as frequency from dm.dm_app_scorecard
                                 where domainid in (WITH RECURSIVE rec (id) as ( SELECT a.id from dm.dm_domain a where id=:domain
-                                UNION ALL SELECT b.id from rec, dm.dm_domain b where b.domainid = rec.id ) SELECT * FROM rec)
+                                UNION DISTINCT SELECT b.id from rec, dm.dm_domain b where b.domainid = rec.id ) SELECT * FROM rec)
                                 group by application, environment, week
                                 order by application, environment, week desc
                             """
@@ -246,9 +246,9 @@ async def get_scorecard(domain: Union[str, None] = None, frequency: Union[str, N
                             cursor2.close()
 
                             sqlstmt = """
-                                select application, environment, deploymentid, startts as datetime from dm.dm_app_lag
+                                select distinct application, environment, deploymentid, startts as datetime from dm.dm_app_lag
                                 where domainid in (WITH RECURSIVE rec (id) as ( SELECT a.id from dm.dm_domain a where id=:domain
-                                UNION ALL SELECT b.id from rec, dm.dm_domain b where b.domainid = rec.id ) SELECT * FROM rec)
+                                UNION DISTINCT SELECT b.id from rec, dm.dm_domain b where b.domainid = rec.id ) SELECT * FROM rec)
                                 order by application, environment, deploymentid
                             """
 
@@ -356,11 +356,11 @@ async def get_scorecard(domain: Union[str, None] = None, frequency: Union[str, N
                             cursor2.close()
 
                             sqlstmt = """
-                                select c.domainid, c.id as appid, b.id as compid, c.name as application, b.name as component, a.name as name, a.value as value
+                                select distinct c.domainid, c.id as appid, b.id as compid, c.name as application, b.name as component, a.name as name, a.value as value
                                 from dm.dm_scorecard_nv a, dm.dm_component b, dm.dm_application c, dm.dm_applicationcomponent d
                                 where a.id = b.id and b.status = 'N' and c.status = 'N' and a.id = d.compid and c.id = d.appid
                                 and c.domainid in (WITH RECURSIVE rec (id) as ( SELECT a.id from dm.dm_domain a where id=:domain
-                                UNION ALL SELECT b.id from rec, dm.dm_domain b where b.domainid = rec.id ) SELECT * FROM rec)
+                                UNION DISTINCT SELECT b.id from rec, dm.dm_domain b where b.domainid = rec.id ) SELECT * FROM rec)
                                 order by domainid, appid, compid
                             """
 
