@@ -11,17 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-FROM python:3.11.3-alpine3.17
+FROM alpine:edge
 
 WORKDIR /app
 COPY . /app
 
 ENV PYTHONPATH=/usr/lib/python3.11/site-packages
-RUN apk --no-cache add libbz2=1.0.8-r4; \
-    apk upgrade; \
-    apk --no-cache add py3-numpy=1.24.2-r0 py3-pandas=1.5.3-r0 --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community;
+RUN apk --no-cache add libbz2=1.0.8-r5 py3-numpy=1.24.3-r0 py3-pandas=1.5.3-r1 python3=3.11.3-r10; \
+    apk upgrade
 
-RUN pip install --no-cache-dir -r requirements.txt; \
+RUN python -m ensurepip --default-pip; \
+    pip install --no-cache-dir -r requirements.txt; \
     cp "$(which uvicorn)" /app; \
     pip uninstall -y pip wheel setuptools
 
