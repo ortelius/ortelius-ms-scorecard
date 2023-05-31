@@ -334,7 +334,7 @@ async def get_scorecard(domain: Union[str, None] = None, frequency: Union[str, N
 
                         cols = []
                         for col in list(envtable.columns):
-                            cols.append("Environment_" + col)
+                            cols.append("Env:_" + col)
                         envtable.columns = cols
 
                         sqlstmt = """
@@ -436,24 +436,28 @@ async def get_scorecard(domain: Union[str, None] = None, frequency: Union[str, N
 
                         apptable.set_index(["appid", "compid"])
 
+                        apptable.Job_Triggered_By = apptable.Job_Triggered_By.apply(lambda x: "Y" if "hudson" in x else "N")
+
+                        apptable.sort_values(by=["application", "component"], inplace=True)
+
                         newcols = [
                             "appid",
                             "compid",
                             "domainid",
                             "application",
                             "component",
-                            "license",
-                            "readme",
-                            "swagger",
-                            "Lines_Changed",
-                            "Contributing_Committers",
-                            "Git_Total_Committers_Cnt",
-                            "Job_Triggered_By",
                             "Sonar_Bugs",
                             "Sonar_Code_Smells",
                             "Sonar_Violations",
                             "Sonar_Project_Status",
                             "Veracode_Score",
+                            "Job_Triggered_By",
+                            "Contributing_Committers",
+                            "Git_Total_Committers_Cnt",
+                            "Lines_Changed",
+                            "swagger",
+                            "readme",
+                            "license",
                         ]
 
                         #    set_dif = set(list(apptable.columns)).symmetric_difference(set(newcols))
@@ -491,7 +495,7 @@ async def get_scorecard(domain: Union[str, None] = None, frequency: Union[str, N
                                 if val is not None:
                                     valstr = str(val)
 
-                                if col.startswith("Environment") and len(valstr.strip()) > 0:
+                                if col.startswith("Env:") and len(valstr.strip()) > 0:
                                     val = "Y"
                                 col = col.lower()
                                 rowdict.update({col: val})
