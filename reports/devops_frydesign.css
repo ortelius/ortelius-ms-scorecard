@@ -17,7 +17,7 @@
  html {}
 
  html, body {
-	 background: #f8f8f8 url(images/header_gradient_tile_horz.png) repeat-x 0 0;
+	 background: #f8f8f8 url(https://console.deployhub.com/dmadminweb/css/images/header_gradient_tile_horz.png) repeat-x 0 0;
 	 font-family: 'Open Sans', sans-serif;
 	 font-size: .85em;
 
@@ -4251,6 +4251,11 @@
 	 word-wrap: break-word;
  }
 
+ #reports > tbody > tr > td:nth-child(n+3):nth-last-child(n) {
+	border-left: 1px solid rgba(0,0,255,0.25);
+	border-right: 1px solid rgba(0,0,255,0.25);
+ }
+
  th.rotate {
 	 font-weight: normal !important;
 	 border-width: 1px;
@@ -4269,6 +4274,10 @@
 	width: 25px;
  }
 
+ #reports > thead > tr > th:nth-child(3) {
+	border-left: 1px solid rgba(0,0,255,0.25);
+ }
+
  .textH {
 	 width: 150px !important;
 	 text-align: left;
@@ -4281,10 +4290,11 @@
 
  .fg-white {
 	 color:white;
+	 font-size: 2em;
  }
 
  .top-120 {
-	 margin-top: 120px;
+	 margin-top: 14px;
  }
 
  .float-left {
@@ -4299,14 +4309,79 @@
 	text-align: center;
  }
 
+ #reports > tbody > tr > td:nth-child(2) {
+	padding-left: 50px;
+ }
+
  #reports > thead {
- font-family: "Courier", Courier, serif;
- font-size: 1.25em;
+ font-family: Verdana;
+ font-size: 1.3em;
+ font-weight: lighter;
  vertical-align: bottom;
- height: 10vw;
+ background: #4473a6;
+ color: white;
+ height: 270px;
+ }
+
+ #reports > thead > tr > th:nth-child(2) {
+	text-align: center;
  }
 
  #reports > tbody {
-	font-family: "Times New Roman", Times, serif;
-	font-size: 1.25em;
+	font-family: Arial;
  }
+
+ #reports > tbody > tr > th {
+	font-size: 1.5em;
+ }
+
+ #reports > tbody > tr > td {
+	font-size: 1.5em;
+ }
+
+ #reports > tbody > tr > td:nth-child(2) {
+	max-width: 250px;
+	overflow-wrap: anywhere;
+ }
+
+ #reports > thead > tr > th:nth-child(2) {
+	max-width: 250px;
+ }
+
+table.dataTable tr.dtrg-group th {
+	background-color:#b9c8da;
+	color: black;
+	font-weight: normal !important;
+ }
+
+ body > div.dtfh-floatingparent.dtfh-floatingparenthead > table > thead > tr > th {
+	 font-family: Verdana;
+	 font-size: 1.3em;
+	 font-weight: lighter;
+	 vertical-align: bottom;
+	 background: #4473a6;
+	 color: white;
+	 height: 150px;
+ }
+
+ body > div.dtfh-floatingparent.dtfh-floatingparenthead > table > thead > tr > th:nth-child(1) {
+	font-weight: bold;
+ }
+
+ body > div.dtfh-floatingparent.dtfh-floatingparenthead > table > thead > tr > th:nth-child(2) {
+	font-weight: bold;
+	text-align: center;
+ }
+
+ #scorecardtitle {
+	margin:0;
+	padding-top: 10px;
+ }
+
+#scorecard-logo {
+	position:absolute;
+	top:10px;
+	left:20px;
+	width:157px;
+	height:27px;
+}

@@ -20,13 +20,20 @@
   <title>Compliance</title>
   <meta name="description" content="Compliance Scorecard" />
   <meta name="keywords" content="sbom, dora metrics" />
-  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/ju/jqc-1.12.4/dt-1.12.1/rg-1.2.0/datatables.min.css" />
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/dataTables.jqueryui.min.css" />
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/fixedheader/3.3.2/css/fixedHeader.dataTables.min.css" />
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/rowgroup/1.3.1/css/rowGroup.dataTables.min.css" />
   <link rel="stylesheet" type="text/css" href="https://console.deployhub.com/dmadminweb/css/devops_frydesign.css" />
+  <link rel="stylesheet" type="text/css" href="https://kit.fontawesome.com/ba98665da8.css" crossorigin="anonymous" />
 </head>
 
 <body class="default">
-  <script type="text/javascript"
-    src="https://cdn.datatables.net/v/ju/jqc-1.12.4/dt-1.12.1/rg-1.2.0/datatables.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+  <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js" integrity="sha256-lSjKY0/srUM9BE3dPm+c4fBo1dky2v27Gdjm2uoZaL0=" crossorigin="anonymous"></script>
+  <script type="text/javascript" src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+  <script type="text/javascript" src="https://cdn.datatables.net/1.13.4/js/dataTables.jqueryui.min.js"></script>
+  <script type="text/javascript" src="https://cdn.datatables.net/fixedheader/3.3.2/js/dataTables.fixedHeader.min.js"></script>
+  <script type="text/javascript" src="https://cdn.datatables.net/rowgroup/1.3.1/js/dataTables.rowGroup.min.js"></script>
   <script type="text/javascript">
 
     function getParameterByName(name) {
@@ -119,22 +126,24 @@
           rowGroup = { dataSrc: ['application'] };
 
           if (frequency.length > 0) {
-            $('#rpttitle').html("Deployment Frequency Per Week Per Environment");
+            $('#scorecardtitle').html("Deployment Frequency Per Week Per Environment");
             rowGroup = null;
           }
           else if (lag.length > 0) {
-            $('#rpttitle').html("Lag Between The Current Deployment And Previous One Per Environment");
+            $('#scorecardtitle').html("Lag Between The Current Deployment And Previous One Per Environment");
             rowGroup = null;
           }
           else
-            $("#rpttitle").html("Compliance Scorecard for " + domain);
+            $("#scorecardtitle").html("Compliance Scorecard for " + domain);
 
           cols = data.columns;
 
           for (i = 0; i < cols.length; i++) {
             var name = toTitleCase(cols[i].name);
             cols[i].name = name
-            if (name == 'Application' || name == "Component" || name == "Domain")
+            if (name == 'Application' || name == "Component")
+              $('#reports > thead >tr').append('<th>' + name + ' Version</th>');
+            else if (name == "Domain")
               $('#reports > thead >tr').append('<th>' + name + '</th>');
             else
               $('#reports > thead >tr').append('<th class="rotate"><div><div class="textH">' + name + '</div></div></th>');
@@ -145,6 +154,7 @@
             select: false,
             ordering: false,
             pageLength: -1,
+            fixedHeader: true,
             sDom: 't<"bottom"lip>',
             columns: cols,
             data: data.data,
@@ -158,34 +168,34 @@
                 let col = cols[i]
                 let val = data[col.data];
                 if (val == 'Y')
-                  $(row).find('td:eq(' + i + ')').css('background-color', 'green').css('color', 'white');
+                  $(row).find('td:eq(' + i + ')').html('<i class="fa-sharp fa-solid fa-shield-check" style="color: green;font-size: 1.5em;"></i>');
                 else if (val == 'N')
-                  $(row).find('td:eq(' + i + ')').css('background-color', 'red').css('color', 'white');
+                  $(row).find('td:eq(' + i + ')').html('<i class="fa-sharp fa-solid fa-shield-minus" style="color: red;font-size: 1.5em;"></i>');
 
                 if (col.name.includes('Sonar') && val + '' != '')
                 {
                  if (val + '' == '0' || val == 'OK')
-                   $(row).find('td:eq(' + i + ')').css('background-color', 'green').css('color', 'white');
+                   $(row).find('td:eq(' + i + ')').css('color', 'green');
                  else if (val + '' != '')
-                  $(row).find('td:eq(' + i + ')').css('background-color', 'red').css('color', 'white');
+                  $(row).find('td:eq(' + i + ')').css('color', 'red');
                 }
                 else if (col.name.includes('Veracode') && val + '' != '')
                 {
                   if (val >= 80)
-                    $(row).find('td:eq(' + i + ')').css('background-color', 'green').css('color', 'white');
+                    $(row).find('td:eq(' + i + ')').css('color', 'green').css('font-size','1.5em');
                   else if (val >= 50 && val < 80)
-                    $(row).find('td:eq(' + i + ')').css('background-color', 'yellow');
+                    $(row).find('td:eq(' + i + ')').css('color', 'goldenrod').css('font-size','1.5em');
                   else if (val < 50)
-                    $(row).find('td:eq(' + i + ')').css('background-color', 'red').css('color', 'white');
+                    $(row).find('td:eq(' + i + ')').css('color', 'red').css('font-size','1.5em');
                 }
                 else if (col.name.includes('Contributing Committers') && val + '' != '')
                 {
                   if (val >= 80)
-                    $(row).find('td:eq(' + i + ')').css('background-color', 'green').css('color', 'white');
+                    $(row).find('td:eq(' + i + ')').css('color', 'green').css('font-size','1.5em');
                   else if (val >= 50 && val < 80)
-                    $(row).find('td:eq(' + i + ')').css('background-color', 'yellow');
+                    $(row).find('td:eq(' + i + ')').css('color', 'goldenrod').css('font-size','1.5em');
                   else if (val < 50)
-                    $(row).find('td:eq(' + i + ')').css('background-color', 'red').css('color', 'white');
+                    $(row).find('td:eq(' + i + ')').css('color', 'red').css('font-size','1.5em');
                 }
               }
             }
@@ -194,14 +204,14 @@
     });
   </script>
 
-  <div class="center-div">
-    <h2 id="rpttitle" class="fg-white"></h2>
-  </div>
+<div class="centerdiv">
+  <img id="scorecard-logo" src="https://console.deployhub.com/dmadminweb/images/logo.png" alt="deployhub logo" width="157px" height="27px" />
+    <h2 id="scorecardtitle" class="fg-white"></h2>
+ </div>
   <div id="datatable"></div>
   <div class="top-120">
-    <div class="float-left">
        <!-- djlint:off H020 -->
-      <table id="reports" class="display fullwidth">
+       <table id="reports" class="display fullwidth">
         <thead>
           <tr>
           </tr>
@@ -210,7 +220,6 @@
         </tbody>
       </table>
       <!-- djlint:on -->
-    </div>
   </div>
 </body>
 

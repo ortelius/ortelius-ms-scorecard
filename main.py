@@ -338,7 +338,7 @@ async def get_scorecard(domain: Union[str, None] = None, frequency: Union[str, N
                         envtable.columns = cols
 
                         sqlstmt = """
-                            select c.domainid, c.id as appid, b.id as compid, c.name as application, b.name as component, a.name as name, a.value as value
+                            select distinct c.domainid, c.id as appid, b.id as compid, c.name as application, b.name as component, a.name as name, a.value as value
                             from dm.dm_scorecard_nv a, dm.dm_component b, dm.dm_application c, dm.dm_applicationcomponent d
                             where a.id = b.id and b.status = 'N' and c.status = 'N' and a.id = d.compid and c.id = d.appid
                             order by domainid, appid, compid
@@ -436,7 +436,7 @@ async def get_scorecard(domain: Union[str, None] = None, frequency: Union[str, N
 
                         apptable.set_index(["appid", "compid"])
 
-                        apptable.Job_Triggered_By = apptable.Job_Triggered_By.apply(lambda x: "Y" if "hudson" in x else "N")
+                        apptable.Job_Triggered_By = apptable.Job_Triggered_By.apply(lambda x: "Y" if "SCM" in str(x) else "N")
 
                         apptable.sort_values(by=["application", "component"], inplace=True)
 
