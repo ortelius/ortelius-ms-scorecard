@@ -4251,7 +4251,7 @@
 	 word-wrap: break-word;
  }
 
- #reports > tbody > tr > td:nth-child(n+3):nth-last-child(n) {
+ #reports, #scorecardrpt > tbody > tr > td:nth-child(n+3):nth-last-child(n) {
 	border-left: 1px solid rgba(0,0,255,0.25);
 	border-right: 1px solid rgba(0,0,255,0.25);
  }
@@ -4265,6 +4265,7 @@
 	 border-bottom: none;
 	 white-space: nowrap;
  }
+
  th.rotate > div {
 	transform: rotate(-90deg);
 	transform: rotate(-90deg);
@@ -4272,9 +4273,11 @@
 	transform: rotate(-90deg);
 	filter: progid:dximagetransform.microsoft.basicimage(rotation=3);
 	width: 25px;
+	position: relative;
+    margin: auto;
  }
 
- #reports > thead > tr > th:nth-child(3) {
+ #reports, #scorecardrpt > thead > tr > th:nth-child(3) {
 	border-left: 1px solid rgba(0,0,255,0.25);
  }
 
@@ -4305,15 +4308,15 @@
 	 width:100%;
  }
 
- #reports > tbody > tr >  td:nth-child(n+3):nth-last-child(n) {
+ #reports, #scorecardrpt > tbody > tr >  td:nth-child(n+3):nth-last-child(n) {
 	text-align: center;
  }
 
- #reports > tbody > tr > td:nth-child(2) {
+ #reports, #scorecardrpt > tbody > tr > td:nth-child(2) {
 	padding-left: 50px;
  }
 
- #reports > thead {
+ #reports, #scorecardrpt > thead {
  font-family: Verdana;
  font-size: 1.3em;
  font-weight: lighter;
@@ -4323,28 +4326,28 @@
  height: 270px;
  }
 
- #reports > thead > tr > th:nth-child(2) {
+ #reports, #scorecardrpt > thead > tr > th:nth-child(2) {
 	text-align: center;
  }
 
- #reports > tbody {
+ #reports, #scorecardrpt > tbody {
 	font-family: Arial;
  }
 
- #reports > tbody > tr > th {
+ #reports, #scorecardrpt > tbody > tr > th {
 	font-size: 1.5em;
  }
 
- #reports > tbody > tr > td {
+ #reports, #scorecardrpt > tbody > tr > td {
 	font-size: 1.5em;
  }
 
- #reports > tbody > tr > td:nth-child(2) {
+ #reports, #scorecardrpt > tbody > tr > td:nth-child(2) {
 	max-width: 250px;
 	overflow-wrap: anywhere;
  }
 
- #reports > thead > tr > th:nth-child(2) {
+ #reports, #scorecardrpt > thead > tr > th:nth-child(2) {
 	max-width: 250px;
  }
 
