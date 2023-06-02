@@ -4308,7 +4308,7 @@
 	 width:100%;
  }
 
- #reports, #scorecardrpt > tbody > tr >  td:nth-child(n+3):nth-last-child(n) {
+#scorecardrpt > tbody > tr >  td:nth-child(n+3):nth-last-child(n) {
 	text-align: center;
  }
 
@@ -4316,7 +4316,7 @@
 	padding-left: 50px;
  }
 
- #reports, #scorecardrpt > thead {
+#scorecardrpt > thead {
  font-family: Verdana;
  font-size: 1.3em;
  font-weight: lighter;
@@ -4326,7 +4326,7 @@
  height: 270px;
  }
 
- #reports, #scorecardrpt > thead > tr > th:nth-child(2) {
+#scorecardrpt > thead > tr > th:nth-child(2) {
 	text-align: center;
  }
 
