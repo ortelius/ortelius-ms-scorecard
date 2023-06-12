@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<!--
+ Copyright (c) 2021 Linux Foundation
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+<html lang="en">
+<head>
+  <title>Deployment Frequency</title>
+  <meta name="description" content="Compliance Scorecard" />
+  <meta name="keywords" content="sbom, dora metrics" />
+  <meta name="google" content="notranslate" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/billboard.js/3.8.2/billboard.min.css" integrity="sha512-5Z+l18yUdjczY7Dd2MGiuq7F/qJub3qg4f49WJqiobQ+td/tXUFOUl2ivh5EtmpPBQtNXtsd8w7q7ardqADR6g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" type="text/css" href="https://console.deployhub.com/dmadminweb/css/devops_frydesign.css" />
+</head>
+<body>
+  <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+  <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js" integrity="sha256-lSjKY0/srUM9BE3dPm+c4fBo1dky2v27Gdjm2uoZaL0=" crossorigin="anonymous"></script>
+  <script src="https://d3js.org/d3.v6.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/billboard.js/3.8.2/billboard.min.js" integrity="sha512-p6sLeOYPAD6ZErEYF14yMgFxpTV3B7tA4XVxRmzhlOSht4/YJ5JtYVEhAcl8mHQOZ9pKKoD4jvIIaeJl9Gv/WA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <script type="text/javascript">
+
+  function getParameterByName(name) {
+    console.log(name);
+    var regexS = "[\\?&]" + name + "=([^&#]*)",
+      regex = new RegExp(regexS),
+      results = regex.exec(window.location.search);
+    if (results == null) {
+      return "";
+    } else {
+      return decodeURIComponent(results[1].replace(/\+/g, " "));
+    }
+  }
+
+  $(document).ready(function () {
+      var appname = getParameterByName("appname");
+      var url = "/msapi/scorecard?frequency=y&appname=" + appname;
+
+      $("#scorecardtitle").html(appname + " Deployment Frequency By Environment Per Month");
+
+      $.getJSON(url,
+                function (data) {
+                  var chart = bb.generate({
+                        data: {
+                          columns: data.data,
+                          type: "bubble",
+                          labels: true
+                        },
+                        axis: {
+                          x: {
+                              type: "category",
+                              categories: data.columns,
+                          },
+                        },
+                        bindto: "#stackedbarchart"
+                      });
+
+                      chart.resize({
+                        width: $(document).width(),
+                        height: $(document).height() /2
+                    });
+
+                    var linechart = bb.generate({
+                        data: {
+                          columns: data.data,
+                          type: "area-spline",
+                          labels: true
+                        },
+                        axis: {
+                          x: {
+                              type: "category",
+                              categories: data.columns,
+                          },
+                        },
+                        bindto: "#linechart"
+                      });
+
+                  });
+    });
+
+  </script>
+
+  <div class="centerdiv">
+    <img id="scorecard-logo" src="https://console.deployhub.com/dmadminweb/images/logo.png" alt="deployhub logo" width="157px" height="27px" />
+      <h2 id="scorecardtitle" class="fg-white"></h2>
+  </div>
+  <div class="top-120">
+    <div id="linechart"></div>
+    <div id="stackedbarchart"></div>
+  </div>
+</body>
+</html>

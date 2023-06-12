@@ -17,6 +17,7 @@ import logging
 import os
 import re
 import socket
+from datetime import datetime
 from time import sleep
 from typing import Union
 
@@ -136,7 +137,9 @@ class ScoreCard(BaseModel):
 
 
 @app.get("/msapi/scorecard")
-async def get_scorecard(domain: Union[str, None] = None, frequency: Union[str, None] = None, env: Union[str, None] = None, lag: Union[str, None] = None) -> ScoreCard:  # noqa: C901
+async def get_scorecard(  # noqa: C901
+    domain: Union[str, None] = None, frequency: Union[str, None] = None, environment: Union[str, None] = None, lag: Union[str, None] = None, appname: Union[str, None] = None
+) -> ScoreCard:
     domname = ""
 
     try:
@@ -162,72 +165,81 @@ async def get_scorecard(domain: Union[str, None] = None, frequency: Union[str, N
 
                         # Read data from PostgreSQL database table and load into a DataFrame instance
                         sqlstmt = (
-                            "select application, environment, (weekly::date)::varchar as week, count(weekly) as frequency from dm.dm_app_scorecard "
-                            "group by application, environment, week "
-                            "order by application, environment, week desc"
+                            "select application, environment, (monthly::date)::varchar as month, count(monthly) as frequency from dm.dm_app_scorecard "
+                            "group by application, month, environment "
+                            "order by application, month desc, environment"
                         )
 
-                        if domain is not None:
-                            domname = ""
-                            params = tuple([domain])
-                            cursor2 = conn.cursor()
-                            cursor2.execute("SELECT dm.fulldomain(%s)", params)
-                            if cursor2.rowcount > 0:
-                                row = cursor2.fetchone()
-                                if row and row[0]:
-                                    domname = row[0]
-                            cursor2.close()
-
-                            sqlstmt = """
-                                select distinct application, environment, (weekly::date)::varchar as week, count(weekly) as frequency from dm.dm_app_scorecard
-                                where domainid in (WITH RECURSIVE rec (id) as ( SELECT a.id from dm.dm_domain a where id=:domain
-                                UNION DISTINCT SELECT b.id from rec, dm.dm_domain b where b.domainid = rec.id ) SELECT * FROM rec)
-                                group by application, environment, week
-                                order by application, environment, week desc
-                            """
-
-                            data_frame = pd.read_sql(sql.text(sqlstmt), connection, params={"domain": domain})
+                        if appname is not None:
+                            sqlstmt = (
+                                "select application, environment, (monthly::date)::varchar as month, count(monthly) as frequency from dm.dm_app_scorecard "
+                                "where application=:appname "
+                                "group by application, month, environment "
+                                "order by application, month desc, environment"
+                            )
+                            data_frame = pd.read_sql(sql.text(sqlstmt), connection, params={"appname": appname})
                         else:
                             data_frame = pd.read_sql(sql.text(sqlstmt), connection)
 
-                        table = data_frame.pivot_table("frequency", ["application", "environment", "week"], "environment")
-                        table = table.fillna("")
-                        cols = list(table.columns)
+                        if len(data_frame.index) > 0:
+                            table = data_frame.pivot_table(values=["frequency"], index=["application", "environment", "month"], columns=["month"])
 
-                        newcols = []
-                        for envname in envorder:
-                            if envname in cols:
-                                newcols.append(envname)
-                        missingcols = list(set(cols).difference(set(newcols)))
-                        newcols.extend(missingcols)
-                        cols = newcols
+                            table = table.fillna(0)
+                            cols = list(table.columns)
 
-                        cols.insert(0, "Week")
-                        cols.insert(0, "Application")
-                        data.columns = []
-                        for col in cols:
-                            column = {"name": col, "data": col}
-                            data.columns.append(column)
+                            cols.insert(0, "Environment")
+                            cols.insert(0, "Application")
 
-                        rows = []
-                        # using a itertuples()
-                        for i in table.itertuples():
-                            row = i.Index
-                            rowdict = {}
-                            rowdict.update({cols[0]: row[0]})
-                            rowdict.update({cols[1]: row[2]})
+                            appmap: dict[tuple, dict] = {}
+                            rows = []
+                            # using a itertuples()
+                            for i in table.itertuples():
+                                row = i.Index
+                                application = row[0]
+                                environment = row[1]
 
-                            for col in cols[2::]:
-                                val = None
-                                if col:
-                                    val = getattr(i, col, None)
+                                rowdict = {}
+                                rowdict.update({cols[0]: row[0]})
+                                rowdict.update({cols[1]: row[1]})
+                                rowdict = appmap.get((application, environment), rowdict)
 
-                                if val is None:
-                                    key = "_" + str(cols.index(col) - 1)
-                                    val = getattr(i, key, "")
-                                rowdict.update({col: val})
-                            rows.append(rowdict)
-                        data.data = rows
+                                for col in cols[2::]:
+                                    val = None
+                                    if val is None:
+                                        key = "_" + str(cols.index(col) - 1)
+                                        val = getattr(i, key, 0)
+
+                                    if rowdict.get(col[1], 0) == 0:
+                                        rowdict.update({col[1]: val})
+                                appmap.update({(application, environment): rowdict})
+
+                            rows = list(appmap.values())
+
+                            cols = []
+                            if len(rows) > 0:
+                                cols = list(rows[0].keys())
+                                cols.remove("Application")
+                                cols.remove("Environment")
+                                cols.sort()
+
+                            datarows = []
+                            for row in rows:
+                                newrow = []
+                                newrow.append(row.get("Environment"))
+                                for col in cols:
+                                    newrow.append(row.get(col, 0))
+                                datarows.append(newrow)
+
+                            for index, item in enumerate(cols):
+                                if "-" in item:
+                                    dt = datetime.strptime(item, "%Y-%m-%d")
+                                    cols[index] = dt.strftime("%b %Y")
+                        else:
+                            cols = ["Environment"]
+                            datarows = []
+
+                        data.columns = cols
+                        data.data = datarows
                         return data
                     elif lag is not None:
                         data = ScoreCard()
@@ -440,30 +452,27 @@ async def get_scorecard(domain: Union[str, None] = None, frequency: Union[str, N
 
                         apptable.sort_values(by=["application", "component"], inplace=True)
 
-                        newcols = [
-                            "appid",
-                            "compid",
-                            "domainid",
-                            "application",
-                            "component",
-                            "Sonar_Bugs",
-                            "Sonar_Code_Smells",
-                            "Sonar_Violations",
-                            "Sonar_Project_Status",
-                            "Veracode_Score",
-                            "Job_Triggered_By",
-                            "Contributing_Committers",
-                            "Git_Total_Committers_Cnt",
-                            "Lines_Changed",
-                            "swagger",
-                            "readme",
-                            "license",
-                        ]
-
-                        #    set_dif = set(list(apptable.columns)).symmetric_difference(set(newcols))
-                        #    temp3 = list(set_dif)
-                        #    print(temp3)
-                        apptable = apptable.reindex(columns=newcols)
+                        apptable = apptable.reindex(
+                            columns=[
+                                "appid",
+                                "compid",
+                                "domainid",
+                                "application",
+                                "component",
+                                "Sonar_Bugs",
+                                "Sonar_Code_Smells",
+                                "Sonar_Violations",
+                                "Sonar_Project_Status",
+                                "Veracode_Score",
+                                "Job_Triggered_By",
+                                "Contributing_Committers",
+                                "Git_Total_Committers_Cnt",
+                                "Lines_Changed",
+                                "swagger",
+                                "readme",
+                                "license",
+                            ]
+                        )
 
                         table = pd.merge(apptable, envtable, how="left", on="appid")
                         table = table.fillna("")
@@ -526,8 +535,8 @@ async def get_scorecard(domain: Union[str, None] = None, frequency: Union[str, N
 if __name__ == "__main__":
     uvicorn.run(app, port=5010)
 
-# Frequecy per week per env
+# Frequecy per month per env
 # Time lag per env
 # Lines changed between deploy per env ??
-# Rollbacks per week per env ??
+# Rollbacks per month per env ??
 # Time to rollback ??

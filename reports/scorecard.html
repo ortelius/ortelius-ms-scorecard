@@ -27,7 +27,7 @@
   <link rel="stylesheet" type="text/css" href="https://kit.fontawesome.com/ba98665da8.css" crossorigin="anonymous" />
 </head>
 
-<body class="default">
+<body>
   <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
   <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js" integrity="sha256-lSjKY0/srUM9BE3dPm+c4fBo1dky2v27Gdjm2uoZaL0=" crossorigin="anonymous"></script>
   <script type="text/javascript" src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
@@ -60,7 +60,6 @@
       var url = "/msapi/scorecard";
 
       var domain = getParameterByName("domain");
-      var frequency = getParameterByName("frequency");
       var lag = getParameterByName("lag");
 
       if (domain.length > 0)
@@ -73,19 +72,6 @@
           url = url + "&lag=" + lag;
         else
           url = "/msapi/scorecard?lag=" + lag;
-      }
-      else if (frequency.length > 0) {
-        if (url.includes('?'))
-          url = url + "&frequency=" + frequency;
-        else
-          url = "/msapi/scorecard?frequency=" + frequency;
-
-        columnDefs = [
-          {
-            targets: 1,
-            className: 'dt-body-nowrap'
-          }
-        ]
       }
       else {
         columnDefs = [
@@ -125,11 +111,7 @@
 
           rowGroup = { dataSrc: ['application'] };
 
-          if (frequency.length > 0) {
-            $('#scorecardtitle').html("Deployment Frequency Per Week Per Environment");
-            rowGroup = null;
-          }
-          else if (lag.length > 0) {
+          if (lag.length > 0) {
             $('#scorecardtitle').html("Lag Between The Current Deployment And Previous One Per Environment");
             rowGroup = null;
           }
