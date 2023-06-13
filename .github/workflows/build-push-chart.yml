@@ -157,16 +157,6 @@ jobs:
         with:
           egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
-      - name: Checkout
-        id: checkout
-        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
-
-      - name: Configure Git
-        id: git
-        run: |
-          git config user.name "${{ needs.setenv.outputs.gh_handle }}"
-          git config user.email "${{ needs.setenv.outputs.gh_handle }}@users.noreply.github.com"
-
       - name: Helm Chart Releaser
         uses: ortelius/ms-cr-action@0aed84909ef7f2a08a1ea1e980f499a42fa1fa09 # v1.2.1
         with:
@@ -174,6 +164,7 @@ jobs:
           gpg_passphrase: ${{ secrets.GPG_PASSPHRASE }}
           gpg_key: ${{ secrets.GPG_KEY }}
           gh_token: ${{ secrets.HELM_INDEXER_TOKEN }}
+          gh_handle: ${{ needs.setenv.outputs.gh_handle }}
           chart: chart/${{ needs.setenv.outputs.compname }}
           chart_version: ${{ needs.setenv.outputs.chart_version }}
           image_repository: ${{ needs.setenv.outputs.image_repository }}
