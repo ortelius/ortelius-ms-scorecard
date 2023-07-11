@@ -1,7 +1,7 @@
-fastapi==0.98.0
-numpy==1.25.0
+fastapi==0.100.0
+numpy==1.25.1
 pandas==1.5.3
 psycopg2_binary==2.9.6
-pydantic==1.10.9
-SQLAlchemy==2.0.17
+pydantic==2.0.2
+SQLAlchemy==2.0.18
 uvicorn==0.22.0
