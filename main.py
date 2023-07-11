@@ -38,6 +38,11 @@ tags_metadata = [
 ]
 
 
+def pad_number(match):
+    number = int(match.group(1))
+    return format(number, "03d")
+
+
 def format_diff(diff):
     duration = str(diff.to_pytimedelta())
     if "." in duration:
@@ -450,7 +455,9 @@ async def get_scorecard(  # noqa: C901
 
                         apptable.Job_Triggered_By = apptable.Job_Triggered_By.apply(lambda x: "Y" if "SCM" in str(x) else "N")
 
-                        apptable.sort_values(by=["application", "component"], inplace=True)
+                        apptable["appver"] = apptable.application.apply(lambda x: re.sub(r"(\d+)", pad_number, x))
+                        apptable.sort_values(by=["appver", "component"], ascending=[False, False], inplace=True)
+                        apptable.drop("appver", axis=1, inplace=True)
 
                         apptable = apptable.reindex(
                             columns=[
