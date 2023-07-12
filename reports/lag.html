@@ -70,20 +70,7 @@
         }
       }
 
-      if (minute != 0) {
-        result += minute;
-
-        if (minute == 1) {
-          result += " min";
-        } else {
-          result += " mins";
-        }
-      }
     return result;
-  }
-
-  function getTimeInDays(mins) {
-    return (mins/1440);
   }
 
   function getParameterByName(name) {
@@ -106,20 +93,6 @@
 
       $.getJSON(url,
                 function (data) {
-                  newrows = []
-                  rows = data.data
-                  for (row of rows)
-                  {
-                    newrow = []
-                    for (i=0;i<row.length;i++)
-                    {
-                     if (i == 0)
-                      newrow.push(row[i])
-                     else
-                      newrow.push(getTimeInDays(row[i]))
-                    }
-                    newrows.push(newrow)
-                  }
 
                   console.log(data);
 
@@ -128,25 +101,29 @@
                           text: "Time in Days"
                         },
                         data: {
-                          columns: newrows,
-                          type: "area-step",
+                          columns: data.data,
+                          type: "bar",
                           labels: {
                             show: true,
-			                      format: function (v, id, i, j){ return getTextOfTime(v); }
+			                      format: function (v, id, i, j){ return v; }
                           },
                         },
                         axis: {
                           x: {
-                              type: "category",
-                              categories: data.columns,
+                            type: "category",
+                            categories: [
+                              ""
+                            ],
                           },
                         },
                         bindto: "#stackedbarchart"
                       });
 
+                      linechart.resize({
+                        height: window.innerHeight - 200
+                      });
                   });
     });
-
   </script>
 
   <style>
@@ -161,7 +138,7 @@
       <h2 id="scorecardtitle" class="fg-white"></h2>
   </div>
   <div class="top-120">
-    <div id="stackedbarchart"></div>
+    <div id="stackedbarchart" height="100%" ></div>
   </div>
 </body>
 </html>

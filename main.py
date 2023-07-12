@@ -43,38 +43,6 @@ def pad_number(match):
     return format(number, "03d")
 
 
-def format_diff(diff):
-    duration = str(diff.to_pytimedelta())
-    if "." in duration:
-        duration = duration.split(".", maxsplit=1)[0]
-
-    if duration == "0:00:00":
-        return "1st deployment"
-
-    days = ""
-    if "days" in duration:
-        days = duration.split(",")[0] + ", "
-        duration = duration.split(",")[1]
-
-    parts = duration.split(":")
-
-    hours = parts[0].lstrip(" 0")
-
-    if hours == "":
-        hours = ""
-    else:
-        hours = hours + "h, "
-
-    mins = parts[1].lstrip(" 0")
-
-    if mins == "":
-        mins = ""
-    else:
-        mins = mins + "m "
-
-    return (days + hours + mins).rstrip(", ")
-
-
 def is_blank(mystr):
     return not (mystr and mystr.strip())
 
@@ -248,86 +216,71 @@ async def get_scorecard(  # noqa: C901
                         return data
                     elif lag is not None:
                         data = ScoreCard()
-                        # Read data from PostgreSQL database table and load into a DataFrame instance
-                        sqlstmt = "select application, environment, deploymentid, startts as datetime from dm.dm_app_lag order by application, environment, deploymentid"
 
-                        if domain is not None:
-                            domname = ""
-                            params = tuple([domain])
-                            cursor2 = conn.cursor()
-                            cursor2.execute("SELECT dm.fulldomain(%s)", params)
-                            if cursor2.rowcount > 0:
-                                row = cursor2.fetchone()
-                                if row and row[0]:
-                                    domname = row[0]
-                            cursor2.close()
+                        if not envorder:
+                            sqlstmt = (
+                                "select a.name, min(b.deploymentid) "
+                                "from dm.dm_environment a, dm.dm_deployment b, dm.dm_application c "
+                                "where a.id = b.envid and b.deploymentid > 0 and b.appid = c.id and c.name = %s group by 1 order by 2"
+                            )
+                            env_cursor = conn.cursor()
+                            env_cursor.execute(sqlstmt, (appname,))
+                            rows = env_cursor.fetchall()
 
-                            sqlstmt = """
-                                select distinct application, environment, deploymentid, startts as datetime from dm.dm_app_lag
-                                where domainid in (WITH RECURSIVE rec (id) as ( SELECT a.id from dm.dm_domain a where id=:domain
-                                UNION DISTINCT SELECT b.id from rec, dm.dm_domain b where b.domainid = rec.id ) SELECT * FROM rec)
-                                order by application, environment, deploymentid
-                            """
+                            for row in rows:
+                                envorder.append(row[0])
 
-                            data_frame = pd.read_sql(sql.text(sqlstmt), connection, params={"domain": domain})
+                            env_cursor.close()
+
+                        sqlstmt = (
+                            "SELECT a.name AS application, "
+                            "d.name AS environment, "
+                            "b.deploymentid, "
+                            "to_timestamp(a.created)::timestamp(0) as created, "
+                            "b.startts::timestamp(0) as datetime "
+                            "FROM dm_application a, "
+                            "dm_deployment b, "
+                            "dm_environment d "
+                            "WHERE a.id = b.appid AND b.envid = d.id"
+                            "order by application, environment, deploymentid "
+                        )
+
+                        if appname is not None:
+                            sqlstmt = (
+                                "SELECT a.name AS application, "
+                                "d.name AS environment, "
+                                "b.deploymentid, "
+                                "to_timestamp(a.created)::timestamp(0) as created, "
+                                "b.startts::timestamp(0) as deployed "
+                                "FROM dm_application a, "
+                                "dm_deployment b, "
+                                "dm_environment d "
+                                "WHERE a.id = b.appid AND b.envid = d.id AND a.name=:appname "
+                                "order by application, environment, deploymentid "
+                            )
+
+                            data_frame = pd.read_sql(sql.text(sqlstmt), connection, params={"appname": appname})
                         else:
                             data_frame = pd.read_sql(sql.text(sqlstmt), connection)
 
-                        table = data_frame.sort_values(by=["application", "environment", "deploymentid"], ascending=[True, True, True]).groupby(["application", "environment"]).head(2)
-                        grp_series = table.sort_values(by=["application", "environment", "deploymentid"], ascending=[True, True, True]).groupby(["application", "environment"])["datetime"]
-                        table["diff"] = grp_series.diff().fillna(pd.Timedelta(seconds=0))
-                        lagtab = table.sort_values(by=["application", "environment", "deploymentid"], ascending=[True, True, False]).groupby(["application", "environment"]).head(1)
-                        lagtab["diff"] = lagtab["diff"].apply(format_diff)
+                        lagtab = data_frame.sort_values(by=["application", "environment", "deploymentid"], ascending=[True, True, False]).groupby(["application", "environment"]).head(1)
+                        lagtab.assign(**lagtab[["created", "deployed"]].apply(pd.to_datetime, format="%Y-%m-%d %H:%M:%S"), inplace=True)
+                        lagtab["diff"] = round((lagtab.deployed - lagtab.created).fillna(pd.Timedelta(seconds=0)).dt.total_seconds() / 86400.0, 2)
+                        lagtab["environment"] = pd.Categorical(lagtab["environment"], categories=envorder)
+                        lagtab.sort_values(by="environment", inplace=True)
+                        lagtab.drop("application", axis=1, inplace=True)
                         lagtab.drop("deploymentid", axis=1, inplace=True)
-                        lagtab.drop("datetime", axis=1, inplace=True)
-                        table = lagtab.pivot(index=["application"], columns=["environment"], values=["diff"]).reset_index()
-                        cols = list(table.columns)
-
-                        newcols = []
-                        newcols.append(("application", ""))
-                        for envname in envorder:
-                            for key, val in cols:
-                                if key == "diff" and envname == val:
-                                    newcols.append((key, val))
-                                    continue
-
-                        missingcols = list(set(cols).difference(set(newcols)))
-                        newcols.extend(missingcols)
-                        table = table.reindex(columns=newcols)
-
-                        table.columns = ["_".join(re.findall(".[^A-Z]*", re.sub(r"^diff_", "", "_".join(tup).rstrip("_")))) for tup in table.columns.values]
-                        table.fillna("", inplace=True)
-
-                        cols = list(table.columns)
-                        data.columns = []
-                        for col in cols:
-                            val = ""
-                            if col:
-                                val = col.lower()
-                            column = {"name": val, "data": val}
-                            data.columns.append(column)
+                        lagtab.drop("created", axis=1, inplace=True)
+                        lagtab.drop("deployed", axis=1, inplace=True)
+                        lagtab.fillna("", inplace=True)
 
                         rows = []
                         # using a itertuples()
-                        for i in table.itertuples():
-                            row = i.Index
-                            rowdict = {}
-
-                            for col in cols:
-                                val = None
-                                varname = ""
-                                if col:
-                                    val = getattr(i, col, None)
-                                    varname = col.lower()
-                                if val is None:
-                                    key = "_" + str(cols.index(col) + 1)
-                                    val = getattr(i, key, "")
-
-                                rowdict.update({varname: val})
-                            rows.append(rowdict)
+                        for i in lagtab.itertuples():
+                            row = [i[1], i[2]]
+                            rows.append(row)
 
                         data.data = rows
-                        data.domain = domname
                         return data
                     else:
                         data = ScoreCard()
