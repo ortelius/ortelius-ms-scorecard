@@ -97,6 +97,9 @@
                   console.log(data);
 
                   var linechart = bb.generate({
+                    indices: {
+                        removeNull: true
+                    },
                     title: {
                           text: "Time in Days"
                         },
@@ -104,18 +107,23 @@
                           columns: data.data,
                           type: "bar",
                           labels: {
-                            show: true,
-			                      format: function (v, id, i, j){ return v; }
-                          },
+                            format: function(x) {
+                              return (x == 0) ? '' : x;
+                            }
+                          }
                         },
                         axis: {
                           x: {
                             type: "category",
-                            categories: [
-                              ""
-                            ],
+                            categories: data.columns,
                           },
                         },
+                        legend: {
+                            contents: {
+                              bindto: "#legend",
+                              template: "<div style='background-color:{=COLOR};color:white;white-space: nowrap;margin:5px;padding:5px;flex: 0 1 auto;flex-basis: 20%;'>{=TITLE}</div>"
+                            }
+                          },
                         bindto: "#stackedbarchart"
                       });
 
@@ -130,6 +138,7 @@
     #stackedbarchart > svg > g:nth-child(3) > text { font-size: 17px; font-weight: bold; }
     #stackedbarchart > svg > g.bb-main > g.bb-axis.bb-axis-x > g > text > tspan { font-size: 17px;}
     #stackedbarchart { margin-top: 40px; }
+    #legend {display: flex; flex-wrap: wrap; }
     .bb-text { font-size: 17px;}
   </style>
 
@@ -139,6 +148,7 @@
   </div>
   <div class="top-120">
     <div id="stackedbarchart" height="100%" ></div>
+    <div id="legend"></div>
   </div>
 </body>
 </html>
