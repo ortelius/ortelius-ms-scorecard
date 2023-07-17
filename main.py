@@ -111,7 +111,7 @@ class ScoreCard(BaseModel):
 
 @app.get("/msapi/scorecard")
 async def get_scorecard(  # noqa: C901
-    domain: Union[str, None] = None, frequency: Union[str, None] = None, environment: Union[str, None] = None, lag: Union[str, None] = None, appname: Union[str, None] = None
+    domain: Union[str, None] = None, frequency: Union[str, None] = None, environment: Union[str, None] = None, lag: Union[str, None] = None, appid: Union[str, None] = None
 ) -> ScoreCard:
     domname = ""
 
@@ -136,23 +136,20 @@ async def get_scorecard(  # noqa: C901
                     if frequency is not None:
                         data = ScoreCard()
 
-                        # Read data from PostgreSQL database table and load into a DataFrame instance
+                        parentid = appid
+                        pcursor = conn.cursor()
+                        pcursor.execute("select parentid from dm.dm_application where id = %s and parentid is not null", (appid,))
+                        rows = pcursor.fetchall()
+                        for row in rows:
+                            parentid = row[0]
+
                         sqlstmt = (
                             "select application, environment, (monthly::date)::varchar as month, count(monthly) as frequency from dm.dm_app_scorecard "
+                            "where parentid=:parentid "
                             "group by application, month, environment "
                             "order by application, month desc, environment"
                         )
-
-                        if appname is not None:
-                            sqlstmt = (
-                                "select application, environment, (monthly::date)::varchar as month, count(monthly) as frequency from dm.dm_app_scorecard "
-                                "where application=:appname "
-                                "group by application, month, environment "
-                                "order by application, month desc, environment"
-                            )
-                            df = pd.read_sql(sql.text(sqlstmt), connection, params={"appname": appname})
-                        else:
-                            df = pd.read_sql(sql.text(sqlstmt), connection)
+                        df = pd.read_sql(sql.text(sqlstmt), connection, params={"parentid": parentid})
 
                         if len(df.index) > 0:
                             table = df.pivot_table(values=["frequency"], index=["application", "environment", "month"], columns=["month"])
@@ -217,22 +214,14 @@ async def get_scorecard(  # noqa: C901
                     elif lag is not None:
                         data = ScoreCard()
 
+                        parentid = appid
+                        pcursor = conn.cursor()
+                        pcursor.execute("select parentid from dm.dm_application where id = %s and parentid is not null", (appid,))
+                        rows = pcursor.fetchall()
+                        for row in rows:
+                            parentid = row[0]
+
                         cols = []
-
-                        if not envorder:
-                            sqlstmt = (
-                                "select a.name, min(b.deploymentid) "
-                                "from dm.dm_environment a, dm.dm_deployment b, dm.dm_application c "
-                                "where a.id = b.envid and b.deploymentid > 0 and b.appid = c.id group by 1 order by 2"
-                            )
-                            env_cursor = conn.cursor()
-                            env_cursor.execute(sqlstmt, (appname,))
-                            rows = env_cursor.fetchall()
-
-                            for row in rows:
-                                envorder.append(row[0])
-
-                            env_cursor.close()
 
                         sqlstmt = (
                             "SELECT a.name AS application, "
@@ -244,7 +233,9 @@ async def get_scorecard(  # noqa: C901
                             "dm_deployment b, "
                             "dm_application c, "
                             "dm_environment d "
-                            "WHERE a.id = b.appid AND b.envid = d.id AND a.parentid = c.id AND c.name = :appname "
+                            "WHERE a.id = b.appid AND b.envid = d.id "
+                            "AND a.parentid = c.id AND c.id = :parentid "
+                            "AND deploymentid > 0 "
                             "UNION "
                             "SELECT a.name AS application, "
                             "d.name AS environment, "
@@ -255,13 +246,21 @@ async def get_scorecard(  # noqa: C901
                             "dm_deployment b, "
                             "dm_application c, "
                             "dm_environment d "
-                            "WHERE a.id = b.appid AND b.envid = d.id AND a.parentid IS NULL AND a.name = :appname "
+                            "WHERE a.id = b.appid AND b.envid = d.id "
+                            "AND a.parentid IS NULL AND a.id = :parentid "
+                            "AND deploymentid > 0 "
                             "order by application, environment, deploymentid "
                         )
 
-                        df = pd.read_sql(sql.text(sqlstmt), connection, params={"appname": appname})
+                        df = pd.read_sql(sql.text(sqlstmt), connection, params={"parentid": parentid})
 
                         if len(df.index) > 0:
+
+                            if not envorder:
+                                envdf = df[["environment", "deploymentid"]].copy()
+                                envdf = envdf.sort_values(by=["deploymentid", "environment"]).groupby(["environment"]).head(1)
+                                envorder = envdf["environment"].to_list()
+
                             lagtab = df.sort_values(by=["application", "environment", "deploymentid"], ascending=[True, True, False]).groupby(["application", "environment"]).head(1)
                             lagtab.assign(**lagtab[["created", "deployed"]].apply(pd.to_datetime, format="%Y-%m-%d %H:%M:%S"), inplace=True)
                             lagtab["diff"] = round((lagtab.deployed - lagtab.created).fillna(pd.Timedelta(seconds=0)).dt.total_seconds() / 86400.0, 2)
@@ -277,9 +276,11 @@ async def get_scorecard(  # noqa: C901
                                 if col[0] == "diff":
                                     newcols.append(col[1])
 
-                            envorder.insert(0, "Application")
-                            result = pd.merge(pd.DataFrame(envorder), pd.DataFrame(newcols))
-                            table.columns = result[0]
+                            sortedcols = ["Application"]
+                            for item in envorder:
+                                if item in newcols:
+                                    sortedcols.append(item)
+                            table.columns = sortedcols
 
                             datarows = []
                             # using a itertuples()
