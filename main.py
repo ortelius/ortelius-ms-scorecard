@@ -255,7 +255,6 @@ async def get_scorecard(  # noqa: C901
                         df = pd.read_sql(sql.text(sqlstmt), connection, params={"parentid": parentid})
 
                         if len(df.index) > 0:
-
                             if not envorder:
                                 envdf = df[["environment", "deploymentid"]].copy()
                                 envdf = envdf.sort_values(by=["deploymentid", "environment"]).groupby(["environment"]).head(1)
