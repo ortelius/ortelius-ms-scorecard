@@ -111,7 +111,7 @@ class ScoreCard(BaseModel):
 
 @app.get("/msapi/scorecard")
 async def get_scorecard(  # noqa: C901
-    domain: Union[str, None] = None, frequency: Union[str, None] = None, environment: Union[str, None] = None, lag: Union[str, None] = None, appid: Union[str, None] = None
+    domain: Union[str, None] = None, frequency: Union[str, None] = None, environment: Union[str, None] = None, lag: Union[str, None] = None, appname: Union[str, None] = None
 ) -> ScoreCard:
     domname = ""
 
@@ -136,20 +136,13 @@ async def get_scorecard(  # noqa: C901
                     if frequency is not None:
                         data = ScoreCard()
 
-                        parentid = appid
-                        pcursor = conn.cursor()
-                        pcursor.execute("select parentid from dm.dm_application where id = %s and parentid is not null", (appid,))
-                        rows = pcursor.fetchall()
-                        for row in rows:
-                            parentid = row[0]
-
                         sqlstmt = (
                             "select application, environment, (monthly::date)::varchar as month, count(monthly) as frequency from dm.dm_app_scorecard "
-                            "where parentid=:parentid "
+                            "where application=:appname "
                             "group by application, month, environment "
                             "order by application, month desc, environment"
                         )
-                        df = pd.read_sql(sql.text(sqlstmt), connection, params={"parentid": parentid})
+                        df = pd.read_sql(sql.text(sqlstmt), connection, params={"appname": appname})
 
                         if len(df.index) > 0:
                             table = df.pivot_table(values=["frequency"], index=["application", "environment", "month"], columns=["month"])
@@ -214,13 +207,6 @@ async def get_scorecard(  # noqa: C901
                     elif lag is not None:
                         data = ScoreCard()
 
-                        parentid = appid
-                        pcursor = conn.cursor()
-                        pcursor.execute("select parentid from dm.dm_application where id = %s and parentid is not null", (appid,))
-                        rows = pcursor.fetchall()
-                        for row in rows:
-                            parentid = row[0]
-
                         cols = []
 
                         sqlstmt = (
@@ -234,7 +220,7 @@ async def get_scorecard(  # noqa: C901
                             "dm_application c, "
                             "dm_environment d "
                             "WHERE a.id = b.appid AND b.envid = d.id "
-                            "AND a.parentid = c.id AND c.id = :parentid "
+                            "AND a.parentid = c.id AND c.name = :appname "
                             "AND deploymentid > 0 "
                             "UNION "
                             "SELECT a.name AS application, "
@@ -247,12 +233,12 @@ async def get_scorecard(  # noqa: C901
                             "dm_application c, "
                             "dm_environment d "
                             "WHERE a.id = b.appid AND b.envid = d.id "
-                            "AND a.parentid IS NULL AND a.id = :parentid "
+                            "AND a.parentid IS NULL AND a.name = :appname "
                             "AND deploymentid > 0 "
                             "order by application, environment, deploymentid "
                         )
 
-                        df = pd.read_sql(sql.text(sqlstmt), connection, params={"parentid": parentid})
+                        df = pd.read_sql(sql.text(sqlstmt), connection, params={"appname": appname})
 
                         if len(df.index) > 0:
                             if not envorder:

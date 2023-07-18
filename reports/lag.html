@@ -86,8 +86,8 @@
   }
 
   $(document).ready(function () {
-      var appid = getParameterByName("appid");
-      var url = "/msapi/scorecard?lag=y&appid=" + appid;
+      var appname = getParameterByName("appname");
+      var url = "/msapi/scorecard?lag=y&appname=" + appname;
 
       $("#scorecardtitle").html("Lead Time For Changes Per Environment");
 
