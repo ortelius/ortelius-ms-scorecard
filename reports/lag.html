@@ -86,10 +86,10 @@
   }
 
   $(document).ready(function () {
-      var appname = getParameterByName("appname");
-      var url = "/msapi/scorecard?lag=y&appname=" + appname;
+      var appid = getParameterByName("appid");
+      var url = "/msapi/scorecard?lag=y&appid=" + appid;
 
-      $("#scorecardtitle").html(appname + " Lead Time For Changes Per Environment");
+      $("#scorecardtitle").html("Lead Time For Changes Per Environment");
 
       $.getJSON(url,
                 function (data) {

@@ -44,10 +44,10 @@
   }
 
   $(document).ready(function () {
-      var appname = getParameterByName("appname");
-      var url = "/msapi/scorecard?frequency=y&appname=" + appname;
+      var appid = getParameterByName("appid");
+      var url = "/msapi/scorecard?frequency=y&appid=" + appid;
 
-      $("#scorecardtitle").html(appname + " Deployment Frequency By Environment Per Month");
+      $("#scorecardtitle").html("Deployment Frequency By Environment Per Month");
 
       $.getJSON(url,
                 function (data) {
