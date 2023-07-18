@@ -17,6 +17,7 @@ import logging
 import os
 import re
 import socket
+from datetime import datetime
 from time import sleep
 from typing import Union
 
@@ -37,36 +38,9 @@ tags_metadata = [
 ]
 
 
-def format_diff(diff):
-    duration = str(diff.to_pytimedelta())
-    if "." in duration:
-        duration = duration.split(".", maxsplit=1)[0]
-
-    if duration == "0:00:00":
-        return "1st deployment"
-
-    days = ""
-    if "days" in duration:
-        days = duration.split(",")[0] + ", "
-        duration = duration.split(",")[1]
-
-    parts = duration.split(":")
-
-    hours = parts[0].lstrip(" 0")
-
-    if hours == "":
-        hours = ""
-    else:
-        hours = hours + "h, "
-
-    mins = parts[1].lstrip(" 0")
-
-    if mins == "":
-        mins = ""
-    else:
-        mins = mins + "m "
-
-    return (days + hours + mins).rstrip(", ")
+def pad_number(match):
+    number = int(match.group(1))
+    return format(number, "03d")
 
 
 def is_blank(mystr):
@@ -136,7 +110,9 @@ class ScoreCard(BaseModel):
 
 
 @app.get("/msapi/scorecard")
-async def get_scorecard(domain: Union[str, None] = None, frequency: Union[str, None] = None, env: Union[str, None] = None, lag: Union[str, None] = None) -> ScoreCard:  # noqa: C901
+async def get_scorecard(  # noqa: C901
+    domain: Union[str, None] = None, frequency: Union[str, None] = None, environment: Union[str, None] = None, lag: Union[str, None] = None, appid: Union[str, None] = None
+) -> ScoreCard:
     domname = ""
 
     try:
@@ -160,157 +136,169 @@ async def get_scorecard(domain: Union[str, None] = None, frequency: Union[str, N
                     if frequency is not None:
                         data = ScoreCard()
 
-                        # Read data from PostgreSQL database table and load into a DataFrame instance
+                        parentid = appid
+                        pcursor = conn.cursor()
+                        pcursor.execute("select parentid from dm.dm_application where id = %s and parentid is not null", (appid,))
+                        rows = pcursor.fetchall()
+                        for row in rows:
+                            parentid = row[0]
+
                         sqlstmt = (
-                            "select application, environment, (weekly::date)::varchar as week, count(weekly) as frequency from dm.dm_app_scorecard "
-                            "group by application, environment, week "
-                            "order by application, environment, week desc"
+                            "select application, environment, (monthly::date)::varchar as month, count(monthly) as frequency from dm.dm_app_scorecard "
+                            "where parentid=:parentid "
+                            "group by application, month, environment "
+                            "order by application, month desc, environment"
                         )
+                        df = pd.read_sql(sql.text(sqlstmt), connection, params={"parentid": parentid})
 
-                        if domain is not None:
-                            domname = ""
-                            params = tuple([domain])
-                            cursor2 = conn.cursor()
-                            cursor2.execute("SELECT dm.fulldomain(%s)", params)
-                            if cursor2.rowcount > 0:
-                                row = cursor2.fetchone()
-                                if row and row[0]:
-                                    domname = row[0]
-                            cursor2.close()
+                        if len(df.index) > 0:
+                            table = df.pivot_table(values=["frequency"], index=["application", "environment", "month"], columns=["month"])
 
-                            sqlstmt = """
-                                select distinct application, environment, (weekly::date)::varchar as week, count(weekly) as frequency from dm.dm_app_scorecard
-                                where domainid in (WITH RECURSIVE rec (id) as ( SELECT a.id from dm.dm_domain a where id=:domain
-                                UNION DISTINCT SELECT b.id from rec, dm.dm_domain b where b.domainid = rec.id ) SELECT * FROM rec)
-                                group by application, environment, week
-                                order by application, environment, week desc
-                            """
+                            table = table.fillna(0)
+                            cols = list(table.columns)
 
-                            data_frame = pd.read_sql(sql.text(sqlstmt), connection, params={"domain": domain})
+                            cols.insert(0, "Environment")
+                            cols.insert(0, "Application")
+
+                            appmap: dict[tuple, dict] = {}
+                            rows = []
+                            # using a itertuples()
+                            for i in table.itertuples():
+                                row = i.Index
+                                application = row[0]
+                                environment = row[1]
+
+                                rowdict = {}
+                                rowdict.update({cols[0]: row[0]})
+                                rowdict.update({cols[1]: row[1]})
+                                rowdict = appmap.get((application, environment), rowdict)
+
+                                for col in cols[2::]:
+                                    val = None
+                                    if val is None:
+                                        key = "_" + str(cols.index(col) - 1)
+                                        val = getattr(i, key, 0)
+
+                                    if rowdict.get(col[1], 0) == 0:
+                                        rowdict.update({col[1]: val})
+                                appmap.update({(application, environment): rowdict})
+
+                            rows = list(appmap.values())
+
+                            cols = []
+                            if len(rows) > 0:
+                                cols = list(rows[0].keys())
+                                cols.remove("Application")
+                                cols.remove("Environment")
+                                cols.sort()
+
+                            datarows = []
+                            for row in rows:
+                                newrow = []
+                                newrow.append(row.get("Environment"))
+                                for col in cols:
+                                    newrow.append(row.get(col, 0))
+                                datarows.append(newrow)
+
+                            for index, item in enumerate(cols):
+                                if "-" in item:
+                                    dt = datetime.strptime(item, "%Y-%m-%d")
+                                    cols[index] = dt.strftime("%b %Y")
                         else:
-                            data_frame = pd.read_sql(sql.text(sqlstmt), connection)
+                            cols = ["Environment"]
+                            datarows = []
 
-                        table = data_frame.pivot_table("frequency", ["application", "environment", "week"], "environment")
-                        table = table.fillna("")
-                        cols = list(table.columns)
-
-                        newcols = []
-                        for envname in envorder:
-                            if envname in cols:
-                                newcols.append(envname)
-                        missingcols = list(set(cols).difference(set(newcols)))
-                        newcols.extend(missingcols)
-                        cols = newcols
-
-                        cols.insert(0, "Week")
-                        cols.insert(0, "Application")
-                        data.columns = []
-                        for col in cols:
-                            column = {"name": col, "data": col}
-                            data.columns.append(column)
-
-                        rows = []
-                        # using a itertuples()
-                        for i in table.itertuples():
-                            row = i.Index
-                            rowdict = {}
-                            rowdict.update({cols[0]: row[0]})
-                            rowdict.update({cols[1]: row[2]})
-
-                            for col in cols[2::]:
-                                val = None
-                                if col:
-                                    val = getattr(i, col, None)
-
-                                if val is None:
-                                    key = "_" + str(cols.index(col) - 1)
-                                    val = getattr(i, key, "")
-                                rowdict.update({col: val})
-                            rows.append(rowdict)
-                        data.data = rows
+                        data.columns = cols
+                        data.data = datarows
                         return data
                     elif lag is not None:
                         data = ScoreCard()
-                        # Read data from PostgreSQL database table and load into a DataFrame instance
-                        sqlstmt = "select application, environment, deploymentid, startts as datetime from dm.dm_app_lag order by application, environment, deploymentid"
 
-                        if domain is not None:
-                            domname = ""
-                            params = tuple([domain])
-                            cursor2 = conn.cursor()
-                            cursor2.execute("SELECT dm.fulldomain(%s)", params)
-                            if cursor2.rowcount > 0:
-                                row = cursor2.fetchone()
-                                if row and row[0]:
-                                    domname = row[0]
-                            cursor2.close()
+                        parentid = appid
+                        pcursor = conn.cursor()
+                        pcursor.execute("select parentid from dm.dm_application where id = %s and parentid is not null", (appid,))
+                        rows = pcursor.fetchall()
+                        for row in rows:
+                            parentid = row[0]
 
-                            sqlstmt = """
-                                select distinct application, environment, deploymentid, startts as datetime from dm.dm_app_lag
-                                where domainid in (WITH RECURSIVE rec (id) as ( SELECT a.id from dm.dm_domain a where id=:domain
-                                UNION DISTINCT SELECT b.id from rec, dm.dm_domain b where b.domainid = rec.id ) SELECT * FROM rec)
-                                order by application, environment, deploymentid
-                            """
+                        cols = []
 
-                            data_frame = pd.read_sql(sql.text(sqlstmt), connection, params={"domain": domain})
-                        else:
-                            data_frame = pd.read_sql(sql.text(sqlstmt), connection)
+                        sqlstmt = (
+                            "SELECT a.name AS application, "
+                            "d.name AS environment, "
+                            "b.deploymentid, "
+                            "to_timestamp(a.created)::timestamp(0) as created, "
+                            "b.startts::timestamp(0) as deployed "
+                            "FROM dm_application a, "
+                            "dm_deployment b, "
+                            "dm_application c, "
+                            "dm_environment d "
+                            "WHERE a.id = b.appid AND b.envid = d.id "
+                            "AND a.parentid = c.id AND c.id = :parentid "
+                            "AND deploymentid > 0 "
+                            "UNION "
+                            "SELECT a.name AS application, "
+                            "d.name AS environment, "
+                            "b.deploymentid, "
+                            "to_timestamp(a.created)::timestamp(0) as created, "
+                            "b.startts::timestamp(0) as deployed "
+                            "FROM dm_application a, "
+                            "dm_deployment b, "
+                            "dm_application c, "
+                            "dm_environment d "
+                            "WHERE a.id = b.appid AND b.envid = d.id "
+                            "AND a.parentid IS NULL AND a.id = :parentid "
+                            "AND deploymentid > 0 "
+                            "order by application, environment, deploymentid "
+                        )
 
-                        table = data_frame.sort_values(by=["application", "environment", "deploymentid"], ascending=[True, True, True]).groupby(["application", "environment"]).head(2)
-                        grp_series = table.sort_values(by=["application", "environment", "deploymentid"], ascending=[True, True, True]).groupby(["application", "environment"])["datetime"]
-                        table["diff"] = grp_series.diff().fillna(pd.Timedelta(seconds=0))
-                        lagtab = table.sort_values(by=["application", "environment", "deploymentid"], ascending=[True, True, False]).groupby(["application", "environment"]).head(1)
-                        lagtab["diff"] = lagtab["diff"].apply(format_diff)
-                        lagtab.drop("deploymentid", axis=1, inplace=True)
-                        lagtab.drop("datetime", axis=1, inplace=True)
-                        table = lagtab.pivot(index=["application"], columns=["environment"], values=["diff"]).reset_index()
-                        cols = list(table.columns)
+                        df = pd.read_sql(sql.text(sqlstmt), connection, params={"parentid": parentid})
 
-                        newcols = []
-                        newcols.append(("application", ""))
-                        for envname in envorder:
-                            for key, val in cols:
-                                if key == "diff" and envname == val:
-                                    newcols.append((key, val))
-                                    continue
+                        if len(df.index) > 0:
+                            if not envorder:
+                                envdf = df[["environment", "deploymentid"]].copy()
+                                envdf = envdf.sort_values(by=["deploymentid", "environment"]).groupby(["environment"]).head(1)
+                                envorder = envdf["environment"].to_list()
 
-                        missingcols = list(set(cols).difference(set(newcols)))
-                        newcols.extend(missingcols)
-                        table = table.reindex(columns=newcols)
+                            lagtab = df.sort_values(by=["application", "environment", "deploymentid"], ascending=[True, True, False]).groupby(["application", "environment"]).head(1)
+                            lagtab.assign(**lagtab[["created", "deployed"]].apply(pd.to_datetime, format="%Y-%m-%d %H:%M:%S"), inplace=True)
+                            lagtab["diff"] = round((lagtab.deployed - lagtab.created).fillna(pd.Timedelta(seconds=0)).dt.total_seconds() / 86400.0, 2)
+                            lagtab.drop("deploymentid", axis=1, inplace=True)
+                            lagtab.drop("created", axis=1, inplace=True)
+                            lagtab.drop("deployed", axis=1, inplace=True)
+                            table = lagtab.pivot_table(values=["diff"], index=["application"], columns=["environment"]).reset_index()
+                            table.fillna(0, inplace=True)
 
-                        table.columns = ["_".join(re.findall(".[^A-Z]*", re.sub(r"^diff_", "", "_".join(tup).rstrip("_")))) for tup in table.columns.values]
-                        table.fillna("", inplace=True)
-
-                        cols = list(table.columns)
-                        data.columns = []
-                        for col in cols:
-                            val = ""
-                            if col:
-                                val = col.lower()
-                            column = {"name": val, "data": val}
-                            data.columns.append(column)
-
-                        rows = []
-                        # using a itertuples()
-                        for i in table.itertuples():
-                            row = i.Index
-                            rowdict = {}
-
+                            cols = list(table.columns)
+                            newcols = ["Application"]
                             for col in cols:
-                                val = None
-                                varname = ""
-                                if col:
-                                    val = getattr(i, col, None)
-                                    varname = col.lower()
-                                if val is None:
-                                    key = "_" + str(cols.index(col) + 1)
-                                    val = getattr(i, key, "")
+                                if col[0] == "diff":
+                                    newcols.append(col[1])
 
-                                rowdict.update({varname: val})
-                            rows.append(rowdict)
+                            sortedcols = ["Application"]
+                            for item in envorder:
+                                if item in newcols:
+                                    sortedcols.append(item)
+                            table.columns = sortedcols
 
-                        data.data = rows
-                        data.domain = domname
+                            datarows = []
+                            # using a itertuples()
+                            for row in table.itertuples():
+                                outrow = []
+
+                                for k in range(1, len(row)):
+                                    outrow.append(row[k])
+
+                                if sum(outrow[1:]) > 0:
+                                    datarows.append(outrow)
+                            cols = list(table.columns)[1:]
+                        else:
+                            cols = ["Application"]
+                            datarows = []
+
+                        data.columns = cols
+                        data.data = datarows
+
                         return data
                     else:
                         data = ScoreCard()
@@ -320,8 +308,8 @@ async def get_scorecard(domain: Union[str, None] = None, frequency: Union[str, N
                             from dm.dm_application a, dm.dm_environment b, dm.dm_deployment c where a.id = c.appid and c.envid = b.id order by 1, 2
                         """
 
-                        data_frame = pd.read_sql(sql.text(sqlstmt), connection)
-                        envtable = data_frame.pivot(index="appid", columns="environment", values="environment")
+                        df = pd.read_sql(sql.text(sqlstmt), connection)
+                        envtable = df.pivot(index="appid", columns="environment", values="environment")
 
                         cols = list(envtable.columns)
                         newcols = []
@@ -334,11 +322,11 @@ async def get_scorecard(domain: Union[str, None] = None, frequency: Union[str, N
 
                         cols = []
                         for col in list(envtable.columns):
-                            cols.append("Environment_" + col)
+                            cols.append("Env:_" + col)
                         envtable.columns = cols
 
                         sqlstmt = """
-                            select c.domainid, c.id as appid, b.id as compid, c.name as application, b.name as component, a.name as name, a.value as value
+                            select distinct c.domainid, c.id as appid, b.id as compid, c.name as application, b.name as component, a.name as name, a.value as value
                             from dm.dm_scorecard_nv a, dm.dm_component b, dm.dm_application c, dm.dm_applicationcomponent d
                             where a.id = b.id and b.status = 'N' and c.status = 'N' and a.id = d.compid and c.id = d.appid
                             order by domainid, appid, compid
@@ -364,11 +352,11 @@ async def get_scorecard(domain: Union[str, None] = None, frequency: Union[str, N
                                 order by domainid, appid, compid
                             """
 
-                            data_frame = pd.read_sql(sql.text(sqlstmt), connection, params={"domain": domain})
+                            df = pd.read_sql(sql.text(sqlstmt), connection, params={"domain": domain})
                         else:
-                            data_frame = pd.read_sql(sql.text(sqlstmt), connection)
+                            df = pd.read_sql(sql.text(sqlstmt), connection)
 
-                        apptable = data_frame.pivot(index=["appid", "compid", "domainid", "application", "component"], columns=["name"], values=["value"]).reset_index()
+                        apptable = df.pivot(index=["appid", "compid", "domainid", "application", "component"], columns=["name"], values=["value"]).reset_index()
                         apptable.columns = ["_".join(re.findall(".[^A-Z]*", re.sub(r"^value_", "", "_".join(tup).rstrip("_")))) for tup in apptable.columns.values]
 
                         if "license" not in apptable.columns:
@@ -436,30 +424,33 @@ async def get_scorecard(domain: Union[str, None] = None, frequency: Union[str, N
 
                         apptable.set_index(["appid", "compid"])
 
-                        newcols = [
-                            "appid",
-                            "compid",
-                            "domainid",
-                            "application",
-                            "component",
-                            "license",
-                            "readme",
-                            "swagger",
-                            "Lines_Changed",
-                            "Contributing_Committers",
-                            "Git_Total_Committers_Cnt",
-                            "Job_Triggered_By",
-                            "Sonar_Bugs",
-                            "Sonar_Code_Smells",
-                            "Sonar_Violations",
-                            "Sonar_Project_Status",
-                            "Veracode_Score",
-                        ]
+                        apptable.Job_Triggered_By = apptable.Job_Triggered_By.apply(lambda x: "Y" if "SCM" in str(x) else "N")
 
-                        #    set_dif = set(list(apptable.columns)).symmetric_difference(set(newcols))
-                        #    temp3 = list(set_dif)
-                        #    print(temp3)
-                        apptable = apptable.reindex(columns=newcols)
+                        apptable["appver"] = apptable.application.apply(lambda x: re.sub(r"(\d+)", pad_number, x))
+                        apptable.sort_values(by=["appver", "component"], ascending=[False, False], inplace=True)
+                        apptable.drop("appver", axis=1, inplace=True)
+
+                        apptable = apptable.reindex(
+                            columns=[
+                                "appid",
+                                "compid",
+                                "domainid",
+                                "application",
+                                "component",
+                                "Sonar_Bugs",
+                                "Sonar_Code_Smells",
+                                "Sonar_Violations",
+                                "Sonar_Project_Status",
+                                "Veracode_Score",
+                                "Job_Triggered_By",
+                                "Contributing_Committers",
+                                "Git_Total_Committers_Cnt",
+                                "Lines_Changed",
+                                "swagger",
+                                "readme",
+                                "license",
+                            ]
+                        )
 
                         table = pd.merge(apptable, envtable, how="left", on="appid")
                         table = table.fillna("")
@@ -491,7 +482,7 @@ async def get_scorecard(domain: Union[str, None] = None, frequency: Union[str, N
                                 if val is not None:
                                     valstr = str(val)
 
-                                if col.startswith("Environment") and len(valstr.strip()) > 0:
+                                if col.startswith("Env:") and len(valstr.strip()) > 0:
                                     val = "Y"
                                 col = col.lower()
                                 rowdict.update({col: val})
@@ -522,8 +513,8 @@ async def get_scorecard(domain: Union[str, None] = None, frequency: Union[str, N
 if __name__ == "__main__":
     uvicorn.run(app, port=5010)
 
-# Frequecy per week per env
+# Frequecy per month per env
 # Time lag per env
 # Lines changed between deploy per env ??
-# Rollbacks per week per env ??
+# Rollbacks per month per env ??
 # Time to rollback ??

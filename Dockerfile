@@ -17,7 +17,7 @@ WORKDIR /app
 COPY . /app
 
 ENV PYTHONPATH=/usr/lib/python3.11/site-packages
-RUN apk --no-cache add libbz2=1.0.8-r6 py3-numpy=1.24.3-r0 py3-pandas=1.5.3-r1 python3=3.11.3-r11; \
+RUN apk --no-cache add libbz2=1.0.8-r6 py3-numpy=1.25.1-r0 py3-pandas=2.0.3-r0 python3=3.11.4-r1; \
     apk upgrade
 
 RUN python -m ensurepip --default-pip; \
