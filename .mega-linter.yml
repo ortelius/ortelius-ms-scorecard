@@ -18,10 +18,3 @@ DISABLE_LINTERS:
 DISABLE:
   - COPYPASTE
   - SPELL
-
-PRE_COMMANDS:
-  - command: apk add py3-numpy py3-pandas && export PYTHONPATH=/usr/lib/python3.11/site-packages:/usr/lib/python3.10/site-packages && python -m pip install fastapi psycopg2_binary pydantic SQLAlchemy uvicorn
-    cwd: "workspace"
-  - command: apk add py3-numpy py3-pandas && export PYTHONPATH=/usr/lib/python3.11/site-packages && python -m pip install commentjson gitpython importlib-metadata jsonpickle multiprocessing_logging pychalk pygithub pytablewriter python-gitlab regex terminaltables fastapi psycopg2_binary pydantic SQLAlchemy uvicorn
-    venv: pylint
-    cwd: "workspace"
