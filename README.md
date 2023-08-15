@@ -6,6 +6,8 @@
 ![Build](https://img.shields.io/github/actions/workflow/status/ortelius/ms-scorecard/build-push-chart.yml)
 [![MegaLinter](https://github.com/ortelius/ms-scorecard/workflows/MegaLinter/badge.svg?branch=main)](https://github.com/ortelius/ms-scorecard/actions?query=workflow%3AMegaLinter+branch%3Amain)
 ![CodeQL](https://github.com/ortelius/ms-scorecard/workflows/CodeQL/badge.svg)
+[![OpenSSF
+-Scorecard](https://api.securityscorecards.dev/projects/github.com/ortelius/ms-scorecard/badge)](https://api.securityscorecards.dev/projects/github.com/ortelius/ms-scorecard)
 
 ![Discord](https://img.shields.io/discord/722468819091849316)
 
