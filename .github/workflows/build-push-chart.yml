@@ -220,4 +220,3 @@ jobs:
         run: |
           pip install ortelius-cli
           dh updatecomp --rsp component.toml --deppkg cyclonedx@/tmp/cyclonedx.json
-          
