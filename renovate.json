@@ -1,5 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "schedule": ["*/15 * * * *"],
   "ignorePaths": ["chart/**"],
   "prHourlyLimit": 4,
   "pip_requirements": {
@@ -14,6 +15,9 @@
   },
   "github-actions": {
     "managerBranchPrefix": "github-"
+  },
+  "gomod": {
+    "managerBranchPrefix": "gomod-"
   },
   "packageRules": [
     {
