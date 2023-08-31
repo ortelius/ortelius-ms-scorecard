@@ -12,8 +12,13 @@
 		"managerBranchPrefix": "github-"
 	},
 	"packageRules": [{
-		"matchUpdateTypes": ["minor", "patch", "pin", "digest"],
-		"automerge": true,
-		"autoApprove": true
-	}]
+			"matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+			"automerge": true,
+			"autoApprove": true
+		},
+		{
+			"matchFileNames": ["requirements.ini"],
+			"labels": ["pip_requirements"]
+		}
+	]
 }
