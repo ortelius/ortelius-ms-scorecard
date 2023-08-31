@@ -1,5 +1,6 @@
 {
 	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
+	"ignorePaths": ["chart/**"],
 	"extends": ["config:base", "group:all"],
 	"docker": {
 		"managerBranchPrefix": "docker-"
@@ -9,5 +10,10 @@
 	},
 	"github-actions": {
 		"managerBranchPrefix": "github-"
-	}
+	},
+	"packageRules": [{
+		"matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+		"automerge": true,
+		"autoapprove": true
+	}]
 }
