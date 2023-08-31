@@ -18,7 +18,7 @@ COPY . /app
 
 ENV PIP_BREAK_SYSTEM_PACKAGES 1
 ENV PYTHONPATH=/usr/lib/python3.11/site-packages
-RUN apk --no-cache add libbz2=1.0.8-r6 py3-numpy=1.25.2-r0 py3-pandas=2.0.3-r0 python3=3.11.4-r4; \
+RUN apk --no-cache add libbz2=1.0.8-r6 py3-numpy=1.25.2-r0 py3-pandas=2.0.3-r0; \
     apk upgrade
 
 RUN rm /usr/lib/python3.11/EXTERNALLY-MANAGED; \
