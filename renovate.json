@@ -17,7 +17,7 @@
 			"autoApprove": true
 		},
 		{
-			"matchFileNames": ["requirements.ini"],
+			"matchFileNames": ["requirements.in"],
 			"labels": ["pip_requirements"]
 		}
 	]
