@@ -1,11 +1,13 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  {
-  "extends": ["config:base", "group:all"],
-  "docker": {
-    "managerBranchPrefix": "docker-"
-  },
-  "python": {
-    "managerBranchPrefix": "python-"
-  }
+	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
+	"extends": ["config:base", "group:all"],
+	"docker": {
+		"managerBranchPrefix": "docker-"
+	},
+	"python": {
+		"managerBranchPrefix": "python-"
+	},
+	"ghactions": {
+		"managerBranchPrefix": "github-"
+	}
 }
