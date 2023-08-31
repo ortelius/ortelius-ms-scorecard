@@ -7,7 +7,7 @@
 	"python": {
 		"managerBranchPrefix": "python-"
 	},
-	"ghactions": {
+	"github-actions": {
 		"managerBranchPrefix": "github-"
 	}
 }
