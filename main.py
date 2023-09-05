@@ -113,7 +113,7 @@ class ScoreCard(BaseModel):
 
 @app.get("/msapi/scorecard")
 async def get_scorecard(  # noqa: C901
-    domain: Union[str, None] = None, frequency: Union[str, None] = None, environment: Union[str, None] = None, lag: Union[str, None] = None, appname: Union[str, None] = None
+    frequency: Union[str, None] = None, environment: Union[str, None] = None, lag: Union[str, None] = None, appname: Union[str, None] = None, appid: Union[str, None] = None
 ) -> ScoreCard:
     domname = ""
 
@@ -316,33 +316,11 @@ async def get_scorecard(  # noqa: C901
                         sqlstmt = """
                             select distinct c.domainid, c.id as appid, b.id as compid, c.name as application, b.name as component, a.name as name, a.value as value
                             from dm.dm_scorecard_nv a, dm.dm_component b, dm.dm_application c, dm.dm_applicationcomponent d
-                            where a.id = b.id and b.status = 'N' and c.status = 'N' and a.id = d.compid and c.id = d.appid
-                            order by domainid, appid, compid
+                            where a.id = b.id and b.status = 'N' and c.status = 'N' and a.id = d.compid and c.id = d.appid and
+                            (c.id = :appid or c.parentid in (select parentid from dm.dm_application where id = :appid))
                         """
 
-                        if domain is not None:
-                            domname = ""
-                            params = tuple([domain])
-                            cursor2 = conn.cursor()
-                            cursor2.execute("SELECT dm.fulldomain(%s)", params)
-                            if cursor2.rowcount > 0:
-                                row = cursor2.fetchone()
-                                if row and row[0]:
-                                    domname = row[0]
-                            cursor2.close()
-
-                            sqlstmt = """
-                                select distinct c.domainid, c.id as appid, b.id as compid, c.name as application, b.name as component, a.name as name, a.value as value
-                                from dm.dm_scorecard_nv a, dm.dm_component b, dm.dm_application c, dm.dm_applicationcomponent d
-                                where a.id = b.id and b.status = 'N' and c.status = 'N' and a.id = d.compid and c.id = d.appid
-                                and c.domainid in (WITH RECURSIVE rec (id) as ( SELECT a.id from dm.dm_domain a where id=:domain
-                                UNION DISTINCT SELECT b.id from rec, dm.dm_domain b where b.domainid = rec.id ) SELECT * FROM rec)
-                                order by domainid, appid, compid
-                            """
-
-                            df = pd.read_sql(sql.text(sqlstmt), connection, params={"domain": domain})
-                        else:
-                            df = pd.read_sql(sql.text(sqlstmt), connection)
+                        df = pd.read_sql(sql.text(sqlstmt), connection, params={"appid": appid})
 
                         apptable = df.pivot(index=["appid", "compid", "domainid", "application", "component"], columns=["name"], values=["value"]).reset_index()
                         apptable.columns = ["_".join(re.findall(".[^A-Z]*", re.sub(r"^value_", "", "_".join(tup).rstrip("_")))) for tup in apptable.columns.values]

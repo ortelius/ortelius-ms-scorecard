@@ -59,11 +59,11 @@
     $(document).ready(function () {
       var url = "/msapi/scorecard";
 
-      var domain = getParameterByName("domain");
+      var appid = getParameterByName("appid");
       var lag = getParameterByName("lag");
 
-      if (domain.length > 0)
-        url = "/msapi/scorecard?domain=" + domain;
+      if (appid.length > 0)
+        url = "/msapi/scorecard?appid=" + appid;
 
       columnDefs = [];
 
@@ -116,7 +116,7 @@
             rowGroup = null;
           }
           else
-            $("#scorecardtitle").html("Compliance Scorecard for " + domain);
+            $("#scorecardtitle").html("Compliance Scorecard");
 
           cols = data.columns;
 
