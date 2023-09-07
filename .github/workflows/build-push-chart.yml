@@ -158,7 +158,7 @@ jobs:
           egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
       - name: Helm Chart Releaser
-        uses: ortelius/ms-cr-action@563bb5cd2c41ee25ef2507f6523a1ff580dcc48a # v1.2.16
+        uses: ortelius/ms-cr-action@53d14e52e790b3605328437aab2dc3da97044482 # v1.2.17
         with:
           gpg_keyring_base64: ${{ secrets.GPG_KEYRING_BASE64 }}
           gpg_passphrase: ${{ secrets.GPG_PASSPHRASE }}
