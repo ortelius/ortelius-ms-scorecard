@@ -3,6 +3,6 @@ numpy==1.26.0
 pandas==2.1.0
 psycopg2_binary==2.9.7
 pydantic==2.3.0
-SQLAlchemy==2.0.20
+SQLAlchemy==2.0.21
 uvicorn==0.23.2
 certifi==2023.7.22
