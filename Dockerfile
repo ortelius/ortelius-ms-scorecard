@@ -18,12 +18,14 @@ COPY . /app
 
 ENV PIP_BREAK_SYSTEM_PACKAGES 1
 ENV PYTHONPATH=/usr/lib/python3.11/site-packages
-RUN apk --no-cache add libbz2=1.0.8-r6 py3-numpy=1.25.2-r0 py3-pandas=2.0.3-r0; \
+RUN apk update; \
+    apk add --no-cache python3=3.11.6-r1; \
     apk upgrade
 
 RUN rm /usr/lib/python3.11/EXTERNALLY-MANAGED; \
     python -m ensurepip --default-pip; \
-    pip install --no-cache-dir -r requirements.txt; \
+    pip install --no-cache-dir pip==23.3.1; \
+    pip install --no-cache-dir -r requirements.in --no-warn-script-location; \
     cp "$(which uvicorn)" /app; \
     pip uninstall -y pip wheel setuptools
 
