@@ -19,7 +19,7 @@ COPY . /app
 ENV PIP_BREAK_SYSTEM_PACKAGES 1
 ENV PYTHONPATH=/usr/lib/python3.11/site-packages
 RUN apk update; \
-    apk add --no-cache python3=3.11.6-r1; \
+    apk add --no-cache python3; \
     apk upgrade
 
 RUN rm /usr/lib/python3.11/EXTERNALLY-MANAGED; \
