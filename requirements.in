@@ -5,4 +5,4 @@ psycopg2_binary==2.9.9
 pydantic==2.6.0
 SQLAlchemy==2.0.25
 uvicorn==0.27.0.post1
-certifi==2023.11.17
+certifi==2024.2.2
