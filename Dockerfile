@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-FROM alpine:edge@sha256:d81baec21ea8f039866c659d5633b77b0138faa9d4aaee26151dd03c65e09d27
+FROM alpine:edge@sha256:e31c3b1cd47718260e1b6163af0a05b3c428dc01fa410baf72ca8b8076e22e72
 
 WORKDIR /app
 COPY . /app
