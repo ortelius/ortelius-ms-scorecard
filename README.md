@@ -37,10 +37,10 @@ ortelius-ms-scorecard
 
 ### [GET]/health
 
-- Summary
+- Summary  
 Health
 
-- Description
+- Description  
 This health check end point used by Kubernetes
 
 #### Responses
@@ -60,7 +60,7 @@ This health check end point used by Kubernetes
 
 ### [GET]/msapi/scorecard
 
-- Summary
+- Summary  
 Get Scorecard
 
 #### Parameters(Query)
