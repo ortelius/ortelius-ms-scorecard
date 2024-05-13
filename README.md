@@ -1,7 +1,7 @@
 # ortelius-ms-scorecard
 
 ![Release](https://img.shields.io/github/v/release/ortelius/ms-scorecard?sort=semver)
-![license](https://img.shields.io/github/license/ortelius/ms-scorecard)
+![license](https://img.shields.io/github/license/ortelius/.github)
 
 ![Build](https://img.shields.io/github/actions/workflow/status/ortelius/ms-scorecard/build-push-chart.yml)
 [![MegaLinter](https://github.com/ortelius/ms-scorecard/workflows/MegaLinter/badge.svg?branch=main)](https://github.com/ortelius/ms-scorecard/actions?query=workflow%3AMegaLinter+branch%3Amain)
@@ -37,10 +37,10 @@ ortelius-ms-scorecard
 
 ### [GET]/health
 
-- Summary  
+- Summary
 Health
 
-- Description  
+- Description
 This health check end point used by Kubernetes
 
 #### Responses
@@ -60,7 +60,7 @@ This health check end point used by Kubernetes
 
 ### [GET]/msapi/scorecard
 
-- Summary  
+- Summary
 Get Scorecard
 
 #### Parameters(Query)
