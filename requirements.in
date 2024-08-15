@@ -6,3 +6,4 @@ pydantic==2.8.2
 SQLAlchemy==2.0.32
 uvicorn==0.30.6
 certifi==2024.7.4
+starlette==0.37.2
