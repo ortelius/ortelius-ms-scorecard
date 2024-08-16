@@ -16,7 +16,7 @@ pydantic = "2.8.2"
 sqlalchemy = "2.0.32"
 uvicorn = "0.30.6"
 certifi = "2024.7.4"
-starlette = "0.37.2"
+starlette = "0.38.2"
 
 
 [build-system]
