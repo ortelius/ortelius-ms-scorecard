@@ -1,9 +1,0 @@
-fastapi==0.112.0
-numpy==2.0.1
-pandas==2.2.2
-psycopg2_binary==2.9.9
-pydantic==2.8.2
-SQLAlchemy==2.0.32
-uvicorn==0.30.6
-certifi==2024.7.4
-starlette==0.37.2
