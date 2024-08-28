@@ -7,16 +7,16 @@ license = "Apache-2"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
-fastapi = "0.112.2"
-numpy = "2.1.0"
+python = "^3.11"
+fastapi = "0.112.0"
+numpy = "2.0.1"
 pandas = "2.2.2"
 psycopg2-binary = "2.9.9"
 pydantic = "2.8.2"
 sqlalchemy = "2.0.32"
 uvicorn = "0.30.6"
 certifi = "2024.7.4"
-starlette = "0.38.2"
+starlette = "0.37.2"
 
 
 [build-system]
