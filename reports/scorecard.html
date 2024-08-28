@@ -18,7 +18,7 @@
 
 <head>
   <title>Compliance</title>
-  <meta name="description" content="Compliance Scorecard" />
+  <meta name="description" content="Compliance Summary" />
   <meta name="keywords" content="sbom, dora metrics" />
   <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/dataTables.jqueryui.min.css" />
   <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/fixedheader/3.3.2/css/fixedHeader.dataTables.min.css" />
@@ -116,7 +116,7 @@
             rowGroup = null;
           }
           else
-            $("#scorecardtitle").html("Compliance Scorecard");
+            $("#scorecardtitle").html("Compliance Summary");
 
           cols = data.columns;
 
@@ -187,7 +187,6 @@
   </script>
 
 <div class="centerdiv">
-  <img id="scorecard-logo" src="https://console.deployhub.com/dmadminweb/images/logo.png" alt="deployhub logo" width="157px" height="27px" />
     <h2 id="scorecardtitle" class="fg-white"></h2>
  </div>
   <div id="datatable"></div>
