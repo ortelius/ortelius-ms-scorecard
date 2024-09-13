@@ -8,7 +8,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-fastapi = "0.114.1"
+fastapi = "0.114.2"
 numpy = "2.1.1"
 pandas = "2.2.2"
 psycopg2-binary = "2.9.9"
