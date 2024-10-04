@@ -44,10 +44,10 @@
   }
 
   $(document).ready(function () {
-      var appname = getParameterByName("appname");
-      var url = "/msapi/scorecard?frequency=y&appname=" + appname;
+      var appname = getParameterByName("appid");
+      var url = "/msapi/scorecard?frequency=y&appid=" + appname;
 
-      $("#scorecardtitle").html(appname + " Deployment Frequency By Environment Per Month");
+      $("#scorecardtitle").html(" Deployment Frequency By Environment Per Month");
 
       $.getJSON(url,
                 function (data) {
@@ -92,7 +92,6 @@
   </script>
 
   <div class="centerdiv">
-    <img id="scorecard-logo" src="https://console.deployhub.com/dmadminweb/images/logo.png" alt="deployhub logo" width="157px" height="27px" />
       <h2 id="scorecardtitle" class="fg-white"></h2>
   </div>
   <div class="top-120">

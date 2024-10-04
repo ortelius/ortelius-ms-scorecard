@@ -136,15 +136,28 @@ async def get_scorecard(  # noqa: C901
                         envorder.append(row[0])
 
                     if frequency is not None:
+
+                        parentid = -1
+
+                        if appid is not None:
+                            app_cursor = conn.cursor()
+                            params = tuple([appid, appid])
+                            app_cursor.execute("select distinct coalesce(parentid,id) as parentid from dm.dm_application where id = %s or parentid = %s", params)
+                            rows = app_cursor.fetchall()
+
+                            for row in rows:
+                                parentid = row[0] if row[0] else -1
+                                break
+
                         data = ScoreCard()
 
                         sqlstmt = (
                             "select application, environment, (monthly::date)::varchar as month, count(monthly) as frequency from dm.dm_app_scorecard "
-                            "where application=:appname "
+                            "where parentid=:parentid "
                             "group by application, month, environment "
                             "order by application, month desc, environment"
                         )
-                        df = pd.read_sql(sql.text(sqlstmt), connection, params={"appname": appname})
+                        df = pd.read_sql(sql.text(sqlstmt), connection, params={"parentid": parentid})
 
                         if len(df.index) > 0:
                             table = df.pivot_table(values=["frequency"], index=["application", "environment", "month"], columns=["month"])
